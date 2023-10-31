@@ -2,28 +2,23 @@ package nay.kirill.samplerecorder.main.sampleChooser
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import nay.kirill.samplerecorder.domain.SampleType
 
-data class SampleChooserState(
-    val sampleGroups: List<SampleGroup>
+data class SampleChooserUIState(
+    val sampleGroups: List<SampleGroupUi>
 )
 
-data class SampleGroup(
+data class SampleGroupUi(
     @StringRes val titleId: Int,
     @DrawableRes val iconId: Int,
     val type: SampleType,
     val contentDescription: String,
-    val samples: List<SampleUi>
+    val samples: List<SampleUi>,
+    val isSelected: Boolean
 )
 
-enum class SampleType {
-
-    GUITAR, DRUM, TRUMPET
-
-}
-
 data class SampleUi(
-    val isDefault: Boolean,
     val id: Int,
-    val title: String,
+    val name: String,
     val isSelected: Boolean
 )

@@ -16,7 +16,7 @@ import org.koin.androidx.compose.koinViewModel
 internal fun MainScreen(
     viewModel: MainViewModel = koinViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier

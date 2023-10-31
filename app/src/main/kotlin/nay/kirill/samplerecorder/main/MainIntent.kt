@@ -1,6 +1,6 @@
 package nay.kirill.samplerecorder.main
 
-import nay.kirill.samplerecorder.main.sampleChooser.SampleType
+import nay.kirill.samplerecorder.domain.SampleType
 
 sealed interface MainIntent {
 

@@ -16,7 +16,7 @@ val Typography = Typography(
     ),
     titleMedium = TextStyle(
         letterSpacing = 0.sp,
-        fontSize = 28.sp,
+        fontSize = 24.sp,
         fontWeight = FontWeight.W700,
         fontFamily = FontFamily.SansSerif,
         lineHeight = 30.sp,

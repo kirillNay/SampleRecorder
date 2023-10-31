@@ -1,6 +1,5 @@
 package nay.kirill.samplerecorder.main.sampleChooser
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,7 +32,7 @@ import nay.kirill.samplerecorder.theme.SampleRecorderTheme
 
 @Composable
 internal fun SampleChooser(
-    state: SampleChooserState,
+    state: SampleChooserUIState,
     accept: (MainIntent) -> Unit
 ) {
     Row(
@@ -42,11 +41,7 @@ internal fun SampleChooser(
     ) {
         state.sampleGroups.forEach { group ->
             Sample(
-                id = group.iconId,
-                type = group.type,
-                description = stringResource(group.titleId),
-                contentDescription = group.contentDescription,
-                samples = group.samples
+                groupState = group
             ) {
                 accept(MainIntent.SelectSample.Default(type = group.type))
             }
@@ -56,52 +51,48 @@ internal fun SampleChooser(
 
 @Composable
 private fun Sample(
-    @DrawableRes id: Int,
-    type: SampleType,
-    description: String,
-    contentDescription: String,
-    samples: List<SampleUi>,
+    modifier: Modifier = Modifier,
+    groupState: SampleGroupUi,
     onClick: () -> Unit
 ) {
     Column (
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        val isSelected = remember(samples) {
-            samples.any { it.isSelected }
-        }
-
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(76.dp)
+                .size(if (groupState.isSelected) 84.dp else 76.dp)
                 .clip(CircleShape)
-                .apply {
-                    if (isSelected) {
+                .run {
+                    if (groupState.isSelected) {
                         border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    } else {
+                        this
                     }
                 }
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .clickable(onClick = onClick)
         ) {
             Image(
-                painter = painterResource(id = id),
+                painter = painterResource(id = groupState.iconId),
                 contentScale = ContentScale.Crop,
-                contentDescription = contentDescription,
+                contentDescription = groupState.contentDescription,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .padding(18.dp)
+                modifier = Modifier.padding(18.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val text = remember(isSelected) {
-            samples.find { it.isSelected }?.title ?: description
+        val title = stringResource(id = groupState.titleId)
+        val text = remember(groupState.isSelected) {
+            groupState.samples.find { it.isSelected }?.name ?: title
         }
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+            style = if (groupState.isSelected) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium,
+            color = if (groupState.isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -111,7 +102,7 @@ private fun Sample(
 private fun SampleChooserPreview() {
     SampleRecorderTheme {
         SampleChooser(
-            state = SampleChooserState(
+            state = SampleChooserUIState(
                 listOf()
             ),
             accept = {}
