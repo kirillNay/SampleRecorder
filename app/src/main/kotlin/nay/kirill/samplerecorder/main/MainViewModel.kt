@@ -26,13 +26,27 @@ class MainViewModel(
     fun accept(intent: MainIntent) {
         when (intent) {
             is MainIntent.SelectSample.Default -> reduceDefaultSample(intent)
-            else -> Unit
+            is MainIntent.SelectSample.Expand -> reduceExpandSample(intent)
+            is MainIntent.SelectSample.Sample -> reduceSelectSample(intent)
         }
     }
 
     private fun reduceDefaultSample(intent: MainIntent.SelectSample.Default) {
         state = state.copy(
             selectedSampleId = state.samples.first { it.type == intent.type }.id
+        )
+    }
+
+    private fun reduceExpandSample(intent: MainIntent.SelectSample.Expand) {
+        state = state.copy(
+            expandedType = intent.type
+        )
+    }
+
+    private fun reduceSelectSample(intent: MainIntent.SelectSample.Sample) {
+        state = state.copy(
+            selectedSampleId = intent.id,
+            expandedType = null
         )
     }
 

@@ -12,12 +12,12 @@ class MainStateConverter : (MainState) -> MainUIState {
     override fun invoke(state: MainState): MainUIState {
         return MainUIState(
             chooserState = SampleChooserUIState(
-                sampleGroups = state.samples.convertToGroups(state.selectedSampleId)
+                sampleGroups = state.samples.convertToGroups(state.selectedSampleId, state.expandedType)
             )
         )
     }
 
-    private fun List<Sample>.convertToGroups(selectedSampleId: Int?): List<SampleGroupUi> {
+    private fun List<Sample>.convertToGroups(selectedSampleId: Int?, expandedType: SampleType?): List<SampleGroupUi> {
         return groupBy { it.type }.map { (type, samples) ->
             when (type) {
                 SampleType.GUITAR -> SampleGroupUi(
@@ -26,7 +26,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     iconId = R.drawable.ic_guitar_sample,
                     contentDescription = "Select guitar sample",
                     samples = samples.map { it.toUi(selectedSampleId) },
-                    isSelected = samples.any { it.id == selectedSampleId }
+                    isSelected = samples.any { it.id == selectedSampleId },
+                    isExpanded = expandedType == type
                 )
                 SampleType.DRUM -> SampleGroupUi(
                     type = SampleType.DRUM,
@@ -34,7 +35,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     iconId = R.drawable.ic_drums_sample,
                     contentDescription = "Select drum sample",
                     samples = samples.map { it.toUi(selectedSampleId) },
-                    isSelected = samples.any { it.id == selectedSampleId }
+                    isSelected = samples.any { it.id == selectedSampleId },
+                    isExpanded = expandedType == type
                 )
                 SampleType.TRUMPET -> SampleGroupUi(
                     type = SampleType.TRUMPET,
@@ -42,7 +44,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     iconId = R.drawable.ic_trumpet_sample,
                     contentDescription = "Select guitar sample",
                     samples = samples.map { it.toUi(selectedSampleId) },
-                    isSelected = samples.any { it.id == selectedSampleId }
+                    isSelected = samples.any { it.id == selectedSampleId },
+                    isExpanded = expandedType == type
                 )
             }
         }

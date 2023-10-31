@@ -14,7 +14,8 @@ data class SampleGroupUi(
     val type: SampleType,
     val contentDescription: String,
     val samples: List<SampleUi>,
-    val isSelected: Boolean
+    val isSelected: Boolean,
+    val isExpanded: Boolean = false
 )
 
 data class SampleUi(

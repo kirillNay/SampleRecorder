@@ -55,12 +55,14 @@ val Typography = Typography(
         lineHeight = 30.sp,
     ),
     labelMedium = TextStyle(
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.W400,
         fontFamily = FontFamily.SansSerif,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
     ),
     labelSmall = TextStyle(
-        fontSize = 16.sp,
+        fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.SansSerif,
         lineHeight = 16.sp,

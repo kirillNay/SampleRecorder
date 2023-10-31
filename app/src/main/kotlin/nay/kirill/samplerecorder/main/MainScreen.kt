@@ -21,7 +21,7 @@ internal fun MainScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 18.dp, horizontal = 26.dp)
+            .padding(vertical = 18.dp, horizontal = 12.dp)
     ) {
         SampleChooser(
             state = state.chooserState,
