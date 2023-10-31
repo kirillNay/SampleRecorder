@@ -3,6 +3,7 @@ package nay.kirill.samplerecorder.main
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.Sample
 import nay.kirill.samplerecorder.domain.SampleType
+import nay.kirill.samplerecorder.main.playerController.PlayerControllerState
 import nay.kirill.samplerecorder.main.sampleChooser.SampleChooserUIState
 import nay.kirill.samplerecorder.main.sampleChooser.SampleGroupUi
 import nay.kirill.samplerecorder.main.sampleChooser.SampleUi
@@ -13,6 +14,11 @@ class MainStateConverter : (MainState) -> MainUIState {
         return MainUIState(
             chooserState = SampleChooserUIState(
                 sampleGroups = state.samples.convertToGroups(state.selectedSampleId, state.expandedType)
+            ),
+            playerControllerState = PlayerControllerState(
+                playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
+                contentDescription = if (state.isPlaying) "Stop" else "Play",
+                isEnabled = state.selectedSampleId != null
             )
         )
     }

@@ -14,4 +14,10 @@ sealed interface MainIntent {
 
     }
 
+    sealed interface Player : MainIntent {
+
+        object OnPlayButton : Player
+
+    }
+
 }

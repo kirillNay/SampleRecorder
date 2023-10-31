@@ -1,8 +1,11 @@
 package nay.kirill.samplerecorder.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import nay.kirill.samplerecorder.domain.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.Sample
@@ -26,11 +29,15 @@ class MainViewModel(
     private val _uiState = MutableStateFlow(stateConverter(state))
     val uiState = _uiState.asStateFlow()
 
+    private var playerStateObserverJob: Job? = null
+
     fun accept(intent: MainIntent) {
         when (intent) {
             is MainIntent.SelectSample.Default -> reduceDefaultSample(intent)
             is MainIntent.SelectSample.Expand -> reduceExpandSample(intent)
             is MainIntent.SelectSample.Sample -> reduceSelectSample(intent)
+            is MainIntent.Player.OnPlayButton -> reduceOnPlayButton()
+            else -> Unit
         }
     }
 
@@ -38,7 +45,7 @@ class MainViewModel(
         val sample = state.samples.first { it.type == intent.type }
 
         if (sample.type == state.selectedSample?.type) {
-            player.playOnce()
+            if (!player.isPlaying) player.playOnce()
             return
         }
 
@@ -66,6 +73,28 @@ class MainViewModel(
     private fun onSampleSelected(sample: Sample) {
         player.create(sample.resourceId)
         player.playOnce()
+        initPlayerObserver()
+    }
+
+    private fun reduceOnPlayButton() {
+        if (player.isPlaying) {
+            player.pause()
+        } else {
+            player.playLoop()
+        }
+    }
+
+    private fun initPlayerObserver() {
+        playerStateObserverJob?.cancel()
+        playerStateObserverJob = viewModelScope.launch {
+            player.state.collect { playerState ->
+                when (playerState) {
+                    is Player.State.Play -> state = state.copy(isPlaying = true)
+                    is Player.State.Pause, is Player.State.Completed -> state = state.copy(isPlaying = false)
+                    else -> Unit
+                }
+            }
+        }
     }
 
 }

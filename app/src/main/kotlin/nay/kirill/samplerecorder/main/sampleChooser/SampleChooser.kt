@@ -39,7 +39,7 @@ import nay.kirill.samplerecorder.main.MainIntent
 @Composable
 internal fun SampleChooser(
     state: SampleChooserUIState,
-    accept: (MainIntent) -> Unit
+    accept: (MainIntent.SelectSample) -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
@@ -58,7 +58,7 @@ internal fun SampleChooser(
 private fun Sample(
     modifier: Modifier = Modifier,
     groupState: SampleGroupUi,
-    accept: (MainIntent) -> Unit
+    accept: (MainIntent.SelectSample) -> Unit
 ) {
     Column (
         modifier = modifier,
@@ -87,7 +87,7 @@ private fun Sample(
 @Composable
 private fun SampleButton(
     groupState: SampleGroupUi,
-    accept: (MainIntent) -> Unit
+    accept: (MainIntent.SelectSample) -> Unit
 ) {
     val width by animateDpAsState(
         targetValue = when {
