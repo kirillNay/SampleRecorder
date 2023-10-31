@@ -33,7 +33,8 @@ class MainViewModel(
 
     private fun reduceDefaultSample(intent: MainIntent.SelectSample.Default) {
         state = state.copy(
-            selectedSampleId = state.samples.first { it.type == intent.type }.id
+            selectedSampleId = state.samples.first { it.type == intent.type }.id,
+            expandedType = null
         )
     }
 
