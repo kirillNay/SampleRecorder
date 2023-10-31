@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import nay.kirill.samplerecorder.domain.GetSamplesUseCase
+import nay.kirill.samplerecorder.domain.Player
+import nay.kirill.samplerecorder.domain.Sample
 
 class MainViewModel(
     private val stateConverter: MainStateConverter,
+    private val player: Player,
     getSamplesUseCase: GetSamplesUseCase
 ) : ViewModel() {
 
@@ -32,10 +35,12 @@ class MainViewModel(
     }
 
     private fun reduceDefaultSample(intent: MainIntent.SelectSample.Default) {
+        val sample = state.samples.first { it.type == intent.type }
         state = state.copy(
-            selectedSampleId = state.samples.first { it.type == intent.type }.id,
+            selectedSampleId = sample.id,
             expandedType = null
         )
+        onSampleSelected(sample)
     }
 
     private fun reduceExpandSample(intent: MainIntent.SelectSample.Expand) {
@@ -49,6 +54,12 @@ class MainViewModel(
             selectedSampleId = intent.id,
             expandedType = null
         )
+        state.samples.find { it.id == intent.id }?.let(::onSampleSelected)
+    }
+
+    private fun onSampleSelected(sample: Sample) {
+        player.create(sample.resourceId)
+        player.playOnce()
     }
 
 }
