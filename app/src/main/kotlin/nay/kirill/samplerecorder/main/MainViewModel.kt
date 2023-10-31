@@ -20,7 +20,7 @@ class MainViewModel(
             if (value == field) return
 
             _uiState.value = stateConverter(value)
-            field = state
+            field = value
         }
 
     private val _uiState = MutableStateFlow(stateConverter(state))
@@ -36,6 +36,12 @@ class MainViewModel(
 
     private fun reduceDefaultSample(intent: MainIntent.SelectSample.Default) {
         val sample = state.samples.first { it.type == intent.type }
+
+        if (sample.type == state.selectedSample?.type) {
+            player.playOnce()
+            return
+        }
+
         state = state.copy(
             selectedSampleId = sample.id,
             expandedType = null

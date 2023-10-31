@@ -8,7 +8,11 @@ data class MainState(
     val samples: List<Sample>,
     val selectedSampleId: Int? = null,
     val expandedType: SampleType? = null
-)
+) {
+
+    val selectedSample: Sample? get() = samples.find { it.id == selectedSampleId }
+
+}
 
 data class MainUIState(
     val chooserState: SampleChooserUIState
