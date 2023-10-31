@@ -27,7 +27,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     contentDescription = "Select guitar sample",
                     samples = samples.map { it.toUi(selectedSampleId) },
                     isSelected = samples.any { it.id == selectedSampleId },
-                    isExpanded = expandedType == type
+                    isExpanded = expandedType == type,
+                    isShort = expandedType != null && expandedType != type
                 )
                 SampleType.DRUM -> SampleGroupUi(
                     type = SampleType.DRUM,
@@ -36,7 +37,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     contentDescription = "Select drum sample",
                     samples = samples.map { it.toUi(selectedSampleId) },
                     isSelected = samples.any { it.id == selectedSampleId },
-                    isExpanded = expandedType == type
+                    isExpanded = expandedType == type,
+                    isShort = expandedType != null && expandedType != type
                 )
                 SampleType.TRUMPET -> SampleGroupUi(
                     type = SampleType.TRUMPET,
@@ -45,7 +47,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     contentDescription = "Select guitar sample",
                     samples = samples.map { it.toUi(selectedSampleId) },
                     isSelected = samples.any { it.id == selectedSampleId },
-                    isExpanded = expandedType == type
+                    isExpanded = expandedType == type,
+                    isShort = expandedType != null && expandedType != type
                 )
             }
         }

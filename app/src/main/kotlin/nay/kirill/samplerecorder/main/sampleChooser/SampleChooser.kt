@@ -92,7 +92,8 @@ private fun SampleButton(
     val width by animateDpAsState(
         targetValue = when {
             groupState.isSelected && !groupState.isExpanded -> 84.dp
-            groupState.isExpanded -> 126.dp
+            groupState.isExpanded -> 156.dp
+            groupState.isShort -> 36.dp
             else -> 76.dp
         }
     )
@@ -100,12 +101,17 @@ private fun SampleButton(
         targetValue = when {
             groupState.isSelected && !groupState.isExpanded -> 84.dp
             groupState.isExpanded -> 300.dp
+            groupState.isShort -> 52.dp
             else -> 76.dp
         }
     )
 
     val roundedCorner by animateIntAsState(
-        targetValue = if (groupState.isExpanded) 25 else 50
+        targetValue = when {
+            groupState.isExpanded -> 25
+            groupState.isShort -> 15
+            else -> 50
+        }
     )
 
     Card (
@@ -128,36 +134,38 @@ private fun SampleButton(
                 onLongClick = { accept(MainIntent.SelectSample.Expand(type = groupState.type)) }
             )
     ){
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ){
-            Image(
-                painter = painterResource(id = groupState.iconId),
-                contentScale = ContentScale.Crop,
-                contentDescription = groupState.contentDescription,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .padding(18.dp)
-                    .size(48.dp)
-            )
-            if (groupState.isExpanded) {
-                Column (
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    groupState.samples.forEachIndexed { index, sample ->
-                        SampleListItem(
-                            sample = sample
-                        ) {
-                            accept(MainIntent.SelectSample.Sample(id = sample.id))
-                        }
-                        if (index != groupState.samples.lastIndex) {
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 6.dp)
-                                    .background(MaterialTheme.colorScheme.background)
-                            )
+        if (!groupState.isShort) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ){
+                Image(
+                    painter = painterResource(id = groupState.iconId),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = groupState.contentDescription,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier
+                        .padding(18.dp)
+                        .size(48.dp)
+                )
+                if (groupState.isExpanded) {
+                    Column (
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        groupState.samples.forEachIndexed { index, sample ->
+                            SampleListItem(
+                                sample = sample
+                            ) {
+                                accept(MainIntent.SelectSample.Sample(id = sample.id))
+                            }
+                            if (index != groupState.samples.lastIndex) {
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 6.dp)
+                                        .background(MaterialTheme.colorScheme.background)
+                                )
+                            }
                         }
                     }
                 }
