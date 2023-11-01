@@ -11,6 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import nay.kirill.samplerecorder.presentation.audioController.AudioController
+import nay.kirill.samplerecorder.presentation.audioController.AudioControllerState
 import nay.kirill.samplerecorder.presentation.playerController.PlayerController
 import nay.kirill.samplerecorder.presentation.playerTimeline.PlayerTimeline
 import nay.kirill.samplerecorder.presentation.sampleChooser.SampleChooser
@@ -31,7 +33,12 @@ internal fun MainScreen(
             state = state.chooserState,
             accept = viewModel::accept
         )
-        Spacer(modifier = Modifier.weight(1F))
+        Spacer(modifier = Modifier.height(18.dp))
+        AudioController(
+            modifier = Modifier.weight(1F),
+            state = AudioControllerState(0f, 0f)
+        )
+        Spacer(modifier = Modifier.height(18.dp))
         PlayerTimeline(
             state = state.timeline
         )

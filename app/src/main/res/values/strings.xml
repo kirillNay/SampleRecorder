@@ -4,4 +4,7 @@
     <string name="guitar_sample">Гитара</string>
     <string name="drum_sample">Ударные</string>
     <string name="trumpet_sample">Духовые</string>
+
+    <string name="volume">Громкость</string>
+    <string name="speed">Скорость</string>
 </resources>
