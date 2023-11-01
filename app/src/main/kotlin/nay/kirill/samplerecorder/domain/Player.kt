@@ -12,9 +12,13 @@ interface Player {
 
     fun pause()
 
+    suspend fun getAmplitude(): Result<List<Float>>
+
     val isPlaying: Boolean
 
     val state: Flow<State>
+
+    val progress: Flow<Float>
 
     sealed interface State {
 

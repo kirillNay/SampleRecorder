@@ -3,6 +3,7 @@ package nay.kirill.samplerecorder.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +18,8 @@ class MainViewModel(
 ) : ViewModel() {
 
     private var state: MainState = MainState(
-        samples = getSamplesUseCase()
+        samples = getSamplesUseCase(),
+        progress = 0F
     )
         private set(value) {
             if (value == field) return
@@ -30,6 +32,7 @@ class MainViewModel(
     val uiState = _uiState.asStateFlow()
 
     private var playerStateObserverJob: Job? = null
+    private var playerProgressObserverJob: Job? = null
 
     fun accept(intent: MainIntent) {
         when (intent) {
@@ -51,7 +54,8 @@ class MainViewModel(
 
         state = state.copy(
             selectedSampleId = sample.id,
-            expandedType = null
+            expandedType = null,
+            progress = 0F
         )
         onSampleSelected(sample)
     }
@@ -65,15 +69,26 @@ class MainViewModel(
     private fun reduceSelectSample(intent: MainIntent.SelectSample.Sample) {
         state = state.copy(
             selectedSampleId = intent.id,
-            expandedType = null
+            expandedType = null,
+            progress = 0F
         )
         state.samples.find { it.id == intent.id }?.let(::onSampleSelected)
     }
 
     private fun onSampleSelected(sample: Sample) {
         player.create(sample.resourceId)
-        player.playOnce()
+        viewModelScope.launch {
+            delay(SELECTED_SAMPLE_PLAY_DELAY)
+            player.playOnce()
+        }
         initPlayerObserver()
+
+        viewModelScope.launch {
+            player.getAmplitude()
+                .onSuccess { state = state.copy(amplitude = it) }
+                .onFailure { state = state.copy(amplitude = null) }
+
+        }
     }
 
     private fun reduceOnPlayButton() {
@@ -95,6 +110,17 @@ class MainViewModel(
                 }
             }
         }
+
+        playerProgressObserverJob?.cancel()
+        playerProgressObserverJob = viewModelScope.launch {
+            player.progress.collect { state = state.copy(progress = it) }
+        }
+    }
+
+    companion object {
+
+        const val SELECTED_SAMPLE_PLAY_DELAY = 200L
+
     }
 
 }
