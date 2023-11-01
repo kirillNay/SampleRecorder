@@ -1,5 +1,6 @@
 package nay.kirill.samplerecorder.presentation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,27 +25,32 @@ internal fun MainScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(vertical = 18.dp, horizontal = 12.dp)
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Spacer(modifier = Modifier.height(170.dp))
+            AudioController(
+                modifier = Modifier.weight(1F),
+                state = AudioControllerState(0f, 0f)
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            PlayerTimeline(
+                state = state.timeline
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            PlayerController(
+                state = state.playerControllerState,
+                accept = viewModel::accept
+            )
+        }
         SampleChooser(
             state = state.chooserState,
-            accept = viewModel::accept
-        )
-        Spacer(modifier = Modifier.height(18.dp))
-        AudioController(
-            modifier = Modifier.weight(1F),
-            state = AudioControllerState(0f, 0f)
-        )
-        Spacer(modifier = Modifier.height(18.dp))
-        PlayerTimeline(
-            state = state.timeline
-        )
-        Spacer(modifier = Modifier.height(18.dp))
-        PlayerController(
-            state = state.playerControllerState,
             accept = viewModel::accept
         )
     }

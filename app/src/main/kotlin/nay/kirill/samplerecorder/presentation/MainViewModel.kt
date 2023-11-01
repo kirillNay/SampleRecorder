@@ -40,7 +40,6 @@ class MainViewModel(
             is MainIntent.SelectSample.Expand -> reduceExpandSample(intent)
             is MainIntent.SelectSample.Sample -> reduceSelectSample(intent)
             is MainIntent.Player.OnPlayButton -> reduceOnPlayButton()
-            else -> Unit
         }
     }
 
@@ -61,8 +60,11 @@ class MainViewModel(
     }
 
     private fun reduceExpandSample(intent: MainIntent.SelectSample.Expand) {
+        val sample = state.samples.first { it.type == intent.type }
+        if (state.expandedType != intent.type) onSampleSelected(sample)
         state = state.copy(
-            expandedType = intent.type
+            expandedType = intent.type,
+            selectedSampleId = sample.id
         )
     }
 
