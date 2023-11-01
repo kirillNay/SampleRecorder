@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main.playerController
+package nay.kirill.samplerecorder.main.playerTimeline
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -22,21 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.times
 import nay.kirill.samplerecorder.theme.SampleRecorderTheme
-
-data class AmplitudeNode(
-    val value: Float,
-    val isPlayed: Boolean
-)
-
-sealed interface PlayerTimelineState {
-
-    data class Data(
-        val amplitude: List<AmplitudeNode>
-    ) : PlayerTimelineState
-
-    object Empty : PlayerTimelineState
-
-}
 
 @Composable
 internal fun PlayerTimeline(

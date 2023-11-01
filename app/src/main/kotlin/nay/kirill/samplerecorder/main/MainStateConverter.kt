@@ -3,9 +3,9 @@ package nay.kirill.samplerecorder.main
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.Sample
 import nay.kirill.samplerecorder.domain.SampleType
-import nay.kirill.samplerecorder.main.playerController.AmplitudeNode
+import nay.kirill.samplerecorder.main.playerTimeline.AmplitudeNode
 import nay.kirill.samplerecorder.main.playerController.PlayerControllerState
-import nay.kirill.samplerecorder.main.playerController.PlayerTimelineState
+import nay.kirill.samplerecorder.main.playerTimeline.PlayerTimelineState
 import nay.kirill.samplerecorder.main.sampleChooser.SampleChooserUIState
 import nay.kirill.samplerecorder.main.sampleChooser.SampleGroupUi
 import nay.kirill.samplerecorder.main.sampleChooser.SampleUi
