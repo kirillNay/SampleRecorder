@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main.sampleChooser
+package nay.kirill.samplerecorder.presentation.sampleChooser
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes

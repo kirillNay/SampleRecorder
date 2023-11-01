@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main.playerController
+package nay.kirill.samplerecorder.presentation.playerController
 
 import androidx.annotation.DrawableRes
 

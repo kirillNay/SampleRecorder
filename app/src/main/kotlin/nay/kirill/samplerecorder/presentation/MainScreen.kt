@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main
+package nay.kirill.samplerecorder.presentation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,9 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import nay.kirill.samplerecorder.main.playerController.PlayerController
-import nay.kirill.samplerecorder.main.playerTimeline.PlayerTimeline
-import nay.kirill.samplerecorder.main.sampleChooser.SampleChooser
+import nay.kirill.samplerecorder.presentation.playerController.PlayerController
+import nay.kirill.samplerecorder.presentation.playerTimeline.PlayerTimeline
+import nay.kirill.samplerecorder.presentation.sampleChooser.SampleChooser
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

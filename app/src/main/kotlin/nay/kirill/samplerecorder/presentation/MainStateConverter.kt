@@ -1,14 +1,14 @@
-package nay.kirill.samplerecorder.main
+package nay.kirill.samplerecorder.presentation
 
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.Sample
 import nay.kirill.samplerecorder.domain.SampleType
-import nay.kirill.samplerecorder.main.playerTimeline.AmplitudeNode
-import nay.kirill.samplerecorder.main.playerController.PlayerControllerState
-import nay.kirill.samplerecorder.main.playerTimeline.PlayerTimelineState
-import nay.kirill.samplerecorder.main.sampleChooser.SampleChooserUIState
-import nay.kirill.samplerecorder.main.sampleChooser.SampleGroupUi
-import nay.kirill.samplerecorder.main.sampleChooser.SampleUi
+import nay.kirill.samplerecorder.presentation.playerTimeline.AmplitudeNode
+import nay.kirill.samplerecorder.presentation.playerController.PlayerControllerState
+import nay.kirill.samplerecorder.presentation.playerTimeline.PlayerTimelineState
+import nay.kirill.samplerecorder.presentation.sampleChooser.SampleChooserUIState
+import nay.kirill.samplerecorder.presentation.sampleChooser.SampleGroupUi
+import nay.kirill.samplerecorder.presentation.sampleChooser.SampleUi
 
 class MainStateConverter : (MainState) -> MainUIState {
 

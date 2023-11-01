@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main.sampleChooser
+package nay.kirill.samplerecorder.presentation.sampleChooser
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateIntAsState
@@ -34,7 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nay.kirill.samplerecorder.main.MainIntent
+import nay.kirill.samplerecorder.presentation.MainIntent
 
 @Composable
 internal fun SampleChooser(

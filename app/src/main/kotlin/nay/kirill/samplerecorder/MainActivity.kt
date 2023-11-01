@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import nay.kirill.samplerecorder.main.MainScreen
+import nay.kirill.samplerecorder.presentation.MainScreen
 import nay.kirill.samplerecorder.theme.SampleRecorderTheme
 
 class MainActivity : ComponentActivity() {

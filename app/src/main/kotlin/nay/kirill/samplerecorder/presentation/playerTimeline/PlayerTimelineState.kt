@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main.playerTimeline
+package nay.kirill.samplerecorder.presentation.playerTimeline
 
 sealed interface PlayerTimelineState {
 

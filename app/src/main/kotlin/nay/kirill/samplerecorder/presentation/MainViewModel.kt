@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main
+package nay.kirill.samplerecorder.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

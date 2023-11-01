@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main.playerController
+package nay.kirill.samplerecorder.presentation.playerController
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nay.kirill.samplerecorder.R
-import nay.kirill.samplerecorder.main.MainIntent
+import nay.kirill.samplerecorder.presentation.MainIntent
 
 @Composable
 internal fun PlayerController(

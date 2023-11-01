@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.main.playerTimeline
+package nay.kirill.samplerecorder.presentation.playerTimeline
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState

@@ -1,10 +1,10 @@
-package nay.kirill.samplerecorder.main
+package nay.kirill.samplerecorder.presentation
 
 import nay.kirill.samplerecorder.domain.Sample
 import nay.kirill.samplerecorder.domain.SampleType
-import nay.kirill.samplerecorder.main.playerController.PlayerControllerState
-import nay.kirill.samplerecorder.main.playerTimeline.PlayerTimelineState
-import nay.kirill.samplerecorder.main.sampleChooser.SampleChooserUIState
+import nay.kirill.samplerecorder.presentation.playerController.PlayerControllerState
+import nay.kirill.samplerecorder.presentation.playerTimeline.PlayerTimelineState
+import nay.kirill.samplerecorder.presentation.sampleChooser.SampleChooserUIState
 
 data class MainState(
     val samples: List<Sample>,
