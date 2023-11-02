@@ -21,8 +21,8 @@ class MainViewModel(
     private var state: MainState = MainState(
         samples = getSamplesUseCase(),
         progress = 0F,
-        initialSpeed = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
-        initialVolume = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE)
+        initialSpeedScale = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
+        initialVolumeScale = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE),
     )
         private set(value) {
             if (value == field) return
@@ -177,15 +177,6 @@ class MainViewModel(
     private var pendingParams: Pair<Float, Float>? = null
 
     companion object {
-
-        private const val MIN_SPEED_VALUE = 0.5F
-        private const val MAX_SPEED_VALUE = 2F
-
-        private const val MAX_VOLUME_VALUE = 100F
-        private const val MIN_VOLUME_VALUE = 0F
-
-        private const val INITIAL_SPEED_VALUE = 1F
-        private const val INITIAL_VOLUME_VALUE = 50F
 
         private const val SELECTED_SAMPLE_PLAY_DELAY = 200L
 

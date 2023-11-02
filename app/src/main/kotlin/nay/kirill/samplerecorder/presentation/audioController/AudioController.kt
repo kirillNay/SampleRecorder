@@ -1,7 +1,10 @@
+@file:OptIn(ExperimentalTextApi::class)
+
 package nay.kirill.samplerecorder.presentation.audioController
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -31,6 +34,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -78,37 +84,11 @@ fun AudioController(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1F)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.secondaryContainer,
-                                MaterialTheme.colorScheme.background,
-                                MaterialTheme.colorScheme.background
-                            ),
-                            start = Offset(0F,Float.POSITIVE_INFINITY),
-                            end = Offset(Float.POSITIVE_INFINITY, 0F)
-                        )
-                    )
-                    .drawBehind {
-                        drawRoundRect(
-                            primaryColor,
-                            Offset(0f, size.height - 5F / 2),
-                            Size(size.width, 5F),
-                            CornerRadius(10F)
-                        )
-
-                        drawRoundRect(
-                            primaryColor,
-                            Offset(0F, 0F),
-                            Size(5F, size.height),
-                            CornerRadius(10F)
-                        )
-                    }
             ) {
                 val parentWidthPx = constraints.maxWidth
                 val parentHeightPx = constraints.maxHeight
 
-                val circleDiameter = 12.dp
+                val circleDiameter = 8.dp
                 val circleDiameterPx = LocalDensity.current.run { circleDiameter.toPx() }
 
                 val initialX = constraints.maxWidth * state.initialSpeed - circleDiameterPx / 2
@@ -118,15 +98,105 @@ fun AudioController(
                     mutableStateOf(Offset(initialX, initialY))
                 }
 
+                val textMeasure = rememberTextMeasurer()
+                val textStyle = MaterialTheme.typography.bodySmall
+                val color = MaterialTheme.colorScheme.outlineVariant
+
                 Box(
                     modifier = Modifier
-                        .offset { offset.round() }
-                        .size(circleDiameter)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                                    MaterialTheme.colorScheme.background,
+                                    MaterialTheme.colorScheme.background
+                                ),
+                                start = Offset(0F, Float.POSITIVE_INFINITY),
+                                end = Offset(Float.POSITIVE_INFINITY, 0F)
+                            )
+                        )
+                        .drawBehind {
+                            drawRoundRect(
+                                primaryColor,
+                                Offset(0f, size.height - 5F / 2),
+                                Size(size.width, 5F),
+                                CornerRadius(10F)
+                            )
+
+                            drawRoundRect(
+                                primaryColor,
+                                Offset(0F, 0F),
+                                Size(5F, size.height),
+                                CornerRadius(10F)
+                            )
+
+                            //drawing steps
+                            drawRoundRect(
+                                primaryColor,
+                                Offset(size.width * state.initialSpeed, size.height - 50F),
+                                Size(3F, 50F)
+                            )
+
+                            drawText(
+                                textMeasurer = textMeasure,
+                                text = state.initialSpeedText,
+                                style = textStyle.copy(color = color),
+                                topLeft = Offset(size.width * state.initialSpeed - 15F, size.height - 120F)
+                            )
+
+                            drawRoundRect(
+                                primaryColor,
+                                Offset(0F, size.height * state.initialVolume),
+                                Size(50F, 3F)
+                            )
+
+                            drawText(
+                                textMeasurer = textMeasure,
+                                text = state.initialVolumeText,
+                                style = textStyle.copy(color = color),
+                                topLeft = Offset(80F, size.height * state.initialVolume - 30F)
+                            )
+
+                            drawRoundRect(
+                                primaryColor,
+                                Offset(size.width - 3F, size.height - 50F),
+                                Size(3F, 50F)
+                            )
+
+                            drawText(
+                                textMeasurer = textMeasure,
+                                text = state.maxSpeedText,
+                                style = textStyle.copy(color = color),
+                                topLeft = Offset(size.width - 50F, size.height - 120F)
+                            )
+
+                            drawRoundRect(
+                                primaryColor,
+                                Offset(0F, 0F),
+                                Size(50F, 3F)
+                            )
+
+                            drawText(
+                                textMeasurer = textMeasure,
+                                text = state.maxVolumeText,
+                                style = textStyle.copy(color = color),
+                                topLeft = Offset(80F, 0F)
+                            )
+                        }
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = { detectedOffset ->
+                                    offset = detectedOffset
+                                    accept(MainIntent.AudioParams.NewParams(offset.y / parentHeightPx, offset.x / parentWidthPx))
+                                }
+                            )
+                        }
                         .pointerInput(Unit) {
                             detectDragGestures(
-                                onDrag = { _, dragAmount ->
+                                onDrag = { change, dragAmount ->
+                                    change.consume()
+
                                     val summed = offset + dragAmount
                                     val x = summed.x.coerceIn(0f, parentWidthPx - circleDiameterPx)
                                     val y = summed.y.coerceIn(0f, parentHeightPx - circleDiameterPx)
@@ -136,7 +206,15 @@ fun AudioController(
                                 }
                             )
                         }
-                )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .offset { offset.round() }
+                            .size(circleDiameter)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                }
             }
             Text(
                 text = stringResource(id = R.string.speed),
@@ -159,7 +237,7 @@ private fun AudioControllerPreview() {
                 .padding(12.dp)
         ) {
             AudioController(
-                state = AudioControllerState(1F, 1F)
+                state = AudioControllerState(0.5F, 0.5F, "1x", "1x", "2x", "2x")
             ) {}
         }
     }

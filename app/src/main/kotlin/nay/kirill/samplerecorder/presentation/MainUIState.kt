@@ -7,6 +7,15 @@ import nay.kirill.samplerecorder.presentation.playerController.PlayerControllerS
 import nay.kirill.samplerecorder.presentation.playerTimeline.PlayerTimelineState
 import nay.kirill.samplerecorder.presentation.sampleChooser.SampleChooserUIState
 
+const val MIN_SPEED_VALUE = 0.5F
+const val MAX_SPEED_VALUE = 2F
+
+const val MAX_VOLUME_VALUE = 100F
+const val MIN_VOLUME_VALUE = 0F
+
+const val INITIAL_SPEED_VALUE = 1F
+const val INITIAL_VOLUME_VALUE = 50F
+
 data class MainState(
     val samples: List<Sample>,
     val selectedSampleId: Int? = null,
@@ -14,8 +23,8 @@ data class MainState(
     val isPlaying: Boolean = false,
     val amplitude: List<Float>? = null,
     val progress: Float,
-    val initialSpeed: Float,
-    val initialVolume: Float,
+    val initialSpeedScale: Float,
+    val initialVolumeScale: Float,
     val speed: Float = 1F,
     val volume: Float = 1F,
     val duration: Int = 0

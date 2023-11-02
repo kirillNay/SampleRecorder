@@ -33,8 +33,12 @@ class MainStateConverter : (MainState) -> MainUIState {
                     )
                 } ?: PlayerTimelineState.Empty,
                 audioControllerState = AudioControllerState(
-                    initialVolume = state.initialVolume,
-                    initialSpeed = state.initialSpeed
+                    initialVolume = state.initialVolumeScale,
+                    initialSpeed = state.initialSpeedScale,
+                    initialSpeedText = "$INITIAL_SPEED_VALUE",
+                    initialVolumeText = "$INITIAL_VOLUME_VALUE",
+                    maxSpeedText = "$MAX_SPEED_VALUE",
+                    maxVolumeText = "$MAX_VOLUME_VALUE"
                 )
             )
         }
