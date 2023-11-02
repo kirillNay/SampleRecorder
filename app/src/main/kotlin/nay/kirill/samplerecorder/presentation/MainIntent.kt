@@ -14,11 +14,13 @@ sealed interface MainIntent {
 
     }
 
-    sealed interface Player : MainIntent {
+    sealed interface PlayerController : MainIntent {
 
-        object OnPlayButton : Player
+        object OnPlayButton : PlayerController
 
-        data class Seek(val position: Float) : Player
+        data class Seek(val position: Float) : PlayerController
+
+        data class LayersModal(val open: Boolean) : PlayerController
 
     }
 

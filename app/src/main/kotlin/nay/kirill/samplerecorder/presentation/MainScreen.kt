@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,15 +23,14 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import nay.kirill.samplerecorder.R
-import nay.kirill.samplerecorder.domain.SampleType
 import nay.kirill.samplerecorder.presentation.audioController.AudioController
+import nay.kirill.samplerecorder.presentation.playerController.LayerChooser
 import nay.kirill.samplerecorder.presentation.playerController.PlayerController
 import nay.kirill.samplerecorder.presentation.playerTimeline.PlayerTimeline
 import nay.kirill.samplerecorder.presentation.sampleChooser.SampleChooser
-import nay.kirill.samplerecorder.presentation.sampleChooser.SampleChooserUIState
-import nay.kirill.samplerecorder.presentation.sampleChooser.SampleGroupUi
 import nay.kirill.samplerecorder.theme.SampleRecorderTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -38,10 +40,22 @@ internal fun MainScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    Content(
-        state = state,
-        accept = viewModel::accept
-    )
+    SampleRecorderTheme {
+        Scaffold{  contentPadding ->
+            LayersBottomSheet(
+                open = state.isLayersModalOpen,
+                accept = viewModel::accept
+            )
+
+            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Content(
+                    state = state,
+                    accept = viewModel::accept
+                )
+            }
+        }
+
+    }
 }
 
 @Composable
@@ -72,6 +86,15 @@ private fun Content(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.surfaceVariant
                 )
+                Spacer(Modifier.weight(1F))
+                LayerChooser(
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(48.dp),
+                    name = state.layerName
+                ) {
+                    accept(MainIntent.PlayerController.LayersModal(open = true))
+                }
             }
 
             is MainUIState.Sampling -> Column(
@@ -106,46 +129,11 @@ private fun Content(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-private fun MainScreenPreview() {
+private fun MainScreenPreview(
+    @PreviewParameter(MainUIStateProvider::class) state: MainUIState
+) {
     SampleRecorderTheme {
-        Content(
-            state = MainUIState.Empty(
-                chooserState = SampleChooserUIState(
-                    sampleGroups = listOf(
-                        SampleGroupUi(
-                            type = SampleType.GUITAR,
-                            titleId = R.string.guitar_sample,
-                            iconId = R.drawable.ic_guitar_sample,
-                            contentDescription = "Select guitar sample",
-                            samples = listOf(),
-                            isSelected = true,
-                            isExpanded = false,
-                            isShort = false
-                        ),
-                        SampleGroupUi(
-                            type = SampleType.DRUM,
-                            titleId = R.string.drum_sample,
-                            iconId = R.drawable.ic_drums_sample,
-                            contentDescription = "Select drums sample",
-                            samples = listOf(),
-                            isSelected = false,
-                            isExpanded = false,
-                            isShort = false
-                        ),
-                        SampleGroupUi(
-                            type = SampleType.HORN,
-                            titleId = R.string.trumpet_sample,
-                            iconId = R.drawable.ic_trumpet_sample,
-                            contentDescription = "Select trumpet sample",
-                            samples = listOf(),
-                            isSelected = false,
-                            isExpanded = false,
-                            isShort = false
-                        )
-                    )
-                )
-            )
-        ) {}
+        Content(state = state) {}
     }
 }
 

@@ -42,10 +42,15 @@ class MainViewModel(
             is MainIntent.SelectSample.Default -> reduceDefaultSample(intent)
             is MainIntent.SelectSample.Expand -> reduceExpandSample(intent)
             is MainIntent.SelectSample.Sample -> reduceSelectSample(intent)
-            is MainIntent.Player.OnPlayButton -> reduceOnPlayButton()
+            is MainIntent.PlayerController.OnPlayButton -> reduceOnPlayButton()
             is MainIntent.AudioParams.NewParams -> reduceNewAudioParams(intent)
-            is MainIntent.Player.Seek -> reduceSeekPlayer(intent)
+            is MainIntent.PlayerController.Seek -> reduceSeekPlayer(intent)
+            is MainIntent.PlayerController.LayersModal -> reduceOpenLayerModal(intent)
         }
+    }
+
+    private fun reduceOpenLayerModal(intent: MainIntent.PlayerController.LayersModal) {
+        state = state.copy(isLayersOpen = intent.open)
     }
 
     private fun reduceDefaultSample(intent: MainIntent.SelectSample.Default) {
@@ -146,7 +151,7 @@ class MainViewModel(
         }
     }
 
-    private fun reduceSeekPlayer(intent: MainIntent.Player.Seek) {
+    private fun reduceSeekPlayer(intent: MainIntent.PlayerController.Seek) {
         player.seekTo(intent.position)
     }
 

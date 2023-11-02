@@ -15,14 +15,17 @@ class MainStateConverter : (MainState) -> MainUIState {
     override fun invoke(state: MainState): MainUIState {
         return when (state.selectedSampleId) {
             null -> MainUIState.Empty(
-                chooserState = state.chooserState()
+                chooserState = state.chooserState(),
+                isLayersModalOpen = state.isLayersOpen,
+                layerName = "Layer 1"
             )
 
             else -> MainUIState.Sampling(
                 chooserState = state.chooserState(),
                 playerControllerState = PlayerControllerState(
                     playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
-                    contentDescription = if (state.isPlaying) "Stop" else "Play"
+                    contentDescription = if (state.isPlaying) "Stop" else "Play",
+                    layerName = "Слой 1"
                 ),
                 timeline = state.amplitude?.let {
                     PlayerTimelineState.Data(
@@ -39,7 +42,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     initialVolumeText = "$INITIAL_VOLUME_VALUE",
                     maxSpeedText = "$MAX_SPEED_VALUE",
                     maxVolumeText = "$MAX_VOLUME_VALUE"
-                )
+                ),
+                isLayersModalOpen = state.isLayersOpen
             )
         }
     }

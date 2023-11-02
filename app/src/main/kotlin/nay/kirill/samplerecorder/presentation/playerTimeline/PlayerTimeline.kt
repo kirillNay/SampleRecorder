@@ -50,13 +50,13 @@ internal fun PlayerTimeline(
                         .pointerInput(Unit) {
                             detectHorizontalDragGestures { change, _ ->
                                 change.consume()
-                                accept(MainIntent.Player.Seek((change.position.x) / constraints.maxWidth.toFloat()))
+                                accept(MainIntent.PlayerController.Seek((change.position.x) / constraints.maxWidth.toFloat()))
                             }
                         }
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onPress = { offset ->
-                                    accept(MainIntent.Player.Seek((offset.x) / constraints.maxWidth.toFloat()))
+                                    accept(MainIntent.PlayerController.Seek((offset.x) / constraints.maxWidth.toFloat()))
                                 }
                             )
                         },
