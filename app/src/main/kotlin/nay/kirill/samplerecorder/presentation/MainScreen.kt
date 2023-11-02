@@ -86,7 +86,8 @@ private fun Content(
                 )
                 Spacer(modifier = Modifier.height(18.dp))
                 PlayerTimeline(
-                    state = state.timeline
+                    state = state.timeline,
+                    accept = accept
                 )
                 Spacer(modifier = Modifier.height(18.dp))
                 PlayerController(

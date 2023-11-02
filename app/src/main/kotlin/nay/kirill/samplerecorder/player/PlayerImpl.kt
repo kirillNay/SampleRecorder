@@ -119,6 +119,11 @@ internal class PlayerImpl(
         mediaPlayer.setVolume(volume, volume)
     }
 
+    override fun seekTo(value: Float) {
+        _progress.value = value
+        mediaPlayer.seekTo((mediaPlayer.duration * value).toInt())
+    }
+
     companion object {
 
         const val AMPLITUDE_COUNT = 70

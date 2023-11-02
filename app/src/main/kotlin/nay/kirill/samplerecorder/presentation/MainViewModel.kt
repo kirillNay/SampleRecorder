@@ -44,6 +44,7 @@ class MainViewModel(
             is MainIntent.SelectSample.Sample -> reduceSelectSample(intent)
             is MainIntent.Player.OnPlayButton -> reduceOnPlayButton()
             is MainIntent.AudioParams.NewParams -> reduceNewAudioParams(intent)
+            is MainIntent.Player.Seek -> reduceSeekPlayer(intent)
         }
     }
 
@@ -140,6 +141,10 @@ class MainViewModel(
         playerProgressObserverJob = viewModelScope.launch {
             player.progress.collect { state = state.copy(progress = it) }
         }
+    }
+
+    private fun reduceSeekPlayer(intent: MainIntent.Player.Seek) {
+        player.seekTo(intent.position)
     }
 
     private fun updateAudioParams(

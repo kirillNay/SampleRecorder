@@ -16,6 +16,8 @@ interface Player {
 
     fun setVolume(volume: Float)
 
+    fun seekTo(value: Float)
+
     suspend fun getAmplitude(): Result<List<Float>>
 
     val isPlaying: Boolean

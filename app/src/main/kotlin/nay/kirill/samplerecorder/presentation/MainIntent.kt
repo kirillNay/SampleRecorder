@@ -18,6 +18,8 @@ sealed interface MainIntent {
 
         object OnPlayButton : Player
 
+        data class Seek(val position: Float) : Player
+
     }
 
     sealed interface AudioParams : MainIntent {
