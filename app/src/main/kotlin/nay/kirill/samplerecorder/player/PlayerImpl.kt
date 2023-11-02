@@ -34,7 +34,7 @@ internal class PlayerImpl(
     override val duration: Int
         get() = mediaPlayer.duration
 
-    override fun create(resourceId: Int) {
+    override fun create(resourceId: Int, speed: Float, volume: Float) {
         mediaResId = resourceId
 
         stopProgressTimer()
@@ -53,6 +53,8 @@ internal class PlayerImpl(
         }
         _mediaPlayer?.setOnPreparedListener {
             state.value = Player.State.Prepared
+            setSpeed(speed)
+            setVolume(volume)
         }
     }
 
@@ -114,7 +116,6 @@ internal class PlayerImpl(
     }
 
     override fun setSpeed(speed: Float) {
-        if (!mediaPlayer.isPlaying) return
         mediaPlayer.playbackParams = mediaPlayer.playbackParams.apply { this.speed = speed }
     }
 

@@ -87,13 +87,12 @@ class MainViewModel(
     }
 
     private fun onSampleSelected(sample: Sample) {
-        player.create(sample.resourceId)
+        player.create(sample.resourceId, state.speed, state.volume)
         viewModelScope.launch {
             delay(SELECTED_SAMPLE_PLAY_DELAY)
             player.playOnce()
         }
         initPlayerObserver()
-        setupAudioParams()
 
         viewModelScope.launch {
             player.getAmplitude()

@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface Player {
 
-    fun create(resourceId: Int)
+    fun create(resourceId: Int, speed: Float = 1F, volume: Float = 1F)
 
     fun playLoop()
 
