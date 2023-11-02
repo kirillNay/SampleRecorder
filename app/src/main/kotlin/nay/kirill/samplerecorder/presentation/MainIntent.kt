@@ -20,4 +20,12 @@ sealed interface MainIntent {
 
     }
 
+    sealed interface AudioParams : MainIntent {
+
+        data class NewParams(
+            val volume: Float,
+            val speed: Float
+        ) : AudioParams
+
+    }
 }

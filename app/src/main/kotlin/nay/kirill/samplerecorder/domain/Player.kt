@@ -12,6 +12,10 @@ interface Player {
 
     fun pause()
 
+    fun setSpeed(speed: Float)
+
+    fun setVolume(volume: Float)
+
     suspend fun getAmplitude(): Result<List<Float>>
 
     val isPlaying: Boolean

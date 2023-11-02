@@ -110,6 +110,15 @@ internal class PlayerImpl(
         state.value = Player.State.Pause
     }
 
+    override fun setSpeed(speed: Float) {
+        if (!mediaPlayer.isPlaying) return
+        mediaPlayer.playbackParams = mediaPlayer.playbackParams.apply { this.speed = speed }
+    }
+
+    override fun setVolume(volume: Float) {
+        mediaPlayer.setVolume(volume, volume)
+    }
+
     companion object {
 
         const val AMPLITUDE_COUNT = 70

@@ -26,14 +26,6 @@ internal fun PlayerController(
     state: PlayerControllerState,
     accept: (MainIntent.Player) -> Unit
 ) {
-    fun Modifier.clickableIfEnabled(
-        enabled: Boolean
-    ) = if (enabled) {
-        clickable { accept(MainIntent.Player.OnPlayButton) }
-    } else {
-        this
-    }
-
     Column (
         modifier = modifier
             .fillMaxWidth(),
@@ -43,10 +35,8 @@ internal fun PlayerController(
             modifier = Modifier
                 .size(48.dp)
                 .clip(RoundedCornerShape(15))
-                .background(
-                    if (state.isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-                )
-                .clickableIfEnabled(enabled = state.isEnabled),
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable { accept(MainIntent.Player.OnPlayButton) },
             contentAlignment = Alignment.Center,
         ) {
             Image(
@@ -66,8 +56,7 @@ private fun PlayerControllerPreview() {
     PlayerController(
         state = PlayerControllerState(
             playingIcon = R.drawable.ic_play,
-            contentDescription = "",
-            isEnabled = true
+            contentDescription = ""
         )
     ) {
 

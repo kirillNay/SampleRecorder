@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import nay.kirill.samplerecorder.domain.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.Sample
+import kotlin.math.ln
 
 class MainViewModel(
     private val stateConverter: MainStateConverter,
@@ -19,7 +20,9 @@ class MainViewModel(
 
     private var state: MainState = MainState(
         samples = getSamplesUseCase(),
-        progress = 0F
+        progress = 0F,
+        initialSpeed = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
+        initialVolume = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE)
     )
         private set(value) {
             if (value == field) return
@@ -40,6 +43,7 @@ class MainViewModel(
             is MainIntent.SelectSample.Expand -> reduceExpandSample(intent)
             is MainIntent.SelectSample.Sample -> reduceSelectSample(intent)
             is MainIntent.Player.OnPlayButton -> reduceOnPlayButton()
+            is MainIntent.AudioParams.NewParams -> reduceNewAudioParams(intent)
         }
     }
 
@@ -98,6 +102,25 @@ class MainViewModel(
             player.pause()
         } else {
             player.playLoop()
+            player.setSpeed(state.speed)
+            player.setVolume(state.volume)
+        }
+    }
+
+    private fun reduceNewAudioParams(intent: MainIntent.AudioParams.NewParams) {
+        val speed = MIN_SPEED_VALUE + (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
+        val volume = ln(MAX_VOLUME_VALUE - (MIN_VOLUME_VALUE + (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume)) / ln(MAX_VOLUME_VALUE)
+
+        state = state.copy(
+            speed = speed,
+            volume = volume
+        )
+
+        if (player.isPlaying) {
+            updateAudioParams(
+                speed = speed,
+                volume = volume
+            )
         }
     }
 
@@ -119,9 +142,44 @@ class MainViewModel(
         }
     }
 
+    private fun updateAudioParams(
+        speed: Float,
+        volume: Float
+    ) {
+        if (!isAudioParamAvailable) {
+            pendingParams = speed to volume
+            return
+        }
+
+        isAudioParamAvailable = false
+        viewModelScope.launch {
+            delay(300)
+            isAudioParamAvailable = true
+            if (pendingParams != null) {
+                player.setSpeed(pendingParams!!.first)
+                player.setVolume(pendingParams!!.second)
+            }
+        }
+        player.setSpeed(speed)
+        player.setVolume(volume)
+    }
+
+    private var isAudioParamAvailable = true
+
+    private var pendingParams: Pair<Float, Float>? = null
+
     companion object {
 
-        const val SELECTED_SAMPLE_PLAY_DELAY = 200L
+        private const val MIN_SPEED_VALUE = 0.5F
+        private const val MAX_SPEED_VALUE = 2F
+
+        private const val MAX_VOLUME_VALUE = 100F
+        private const val MIN_VOLUME_VALUE = 0F
+
+        private const val INITIAL_SPEED_VALUE = 1F
+        private const val INITIAL_VOLUME_VALUE = 50F
+
+        private const val SELECTED_SAMPLE_PLAY_DELAY = 200L
 
     }
 

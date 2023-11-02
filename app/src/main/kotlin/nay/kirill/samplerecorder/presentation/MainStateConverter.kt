@@ -3,6 +3,7 @@ package nay.kirill.samplerecorder.presentation
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.Sample
 import nay.kirill.samplerecorder.domain.SampleType
+import nay.kirill.samplerecorder.presentation.audioController.AudioControllerState
 import nay.kirill.samplerecorder.presentation.playerTimeline.AmplitudeNode
 import nay.kirill.samplerecorder.presentation.playerController.PlayerControllerState
 import nay.kirill.samplerecorder.presentation.playerTimeline.PlayerTimelineState
@@ -13,18 +14,28 @@ import nay.kirill.samplerecorder.presentation.sampleChooser.SampleUi
 class MainStateConverter : (MainState) -> MainUIState {
 
     override fun invoke(state: MainState): MainUIState {
-        return MainUIState(
-            chooserState = SampleChooserUIState(
-                sampleGroups = state.samples.convertToGroups(state.selectedSampleId, state.expandedType)
-            ),
-            playerControllerState = PlayerControllerState(
-                playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
-                contentDescription = if (state.isPlaying) "Stop" else "Play",
-                isEnabled = state.selectedSampleId != null,
-            ),
-            timeline = state.amplitude?.convertToTimeline(state.progress) ?: PlayerTimelineState.Empty
-        )
+        return when (state.selectedSampleId) {
+            null -> MainUIState.Empty(
+                chooserState = state.chooserState()
+            )
+            else -> MainUIState.Sampling(
+                chooserState = state.chooserState(),
+                playerControllerState = PlayerControllerState(
+                    playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
+                    contentDescription = if (state.isPlaying) "Stop" else "Play"
+                ),
+                timeline = state.amplitude?.convertToTimeline(state.progress) ?: PlayerTimelineState.Empty,
+                audioControllerState = AudioControllerState(
+                    initialVolume = state.initialVolume,
+                    initialSpeed = state.initialSpeed
+                )
+            )
+        }
     }
+
+    private fun MainState.chooserState() = SampleChooserUIState(
+        sampleGroups = samples.convertToGroups(selectedSampleId, expandedType)
+    )
 
     private fun List<Float>.convertToTimeline(progress: Float): PlayerTimelineState = PlayerTimelineState.Data(
         amplitude = mapIndexed { index, value ->
