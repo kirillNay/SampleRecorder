@@ -133,7 +133,7 @@ private fun MainScreenPreview() {
                             isShort = false
                         ),
                         SampleGroupUi(
-                            type = SampleType.TRUMPET,
+                            type = SampleType.HORN,
                             titleId = R.string.trumpet_sample,
                             iconId = R.drawable.ic_trumpet_sample,
                             contentDescription = "Select trumpet sample",

@@ -9,28 +9,28 @@ internal class SampleRepositoryImpl : SampleRepository {
 
     override fun getSamples(): List<Sample> = listOf(
         Sample(
-            name = "Anxiety",
-            resourceId = R.raw.anxiety,
+            name = "Deep Purple",
+            resourceId = R.raw.deep_purple,
             type = SampleType.GUITAR
         ),
         Sample(
-            name = "Acoustic",
-            resourceId = R.raw.acoustic,
+            name = "Joe Pass",
+            resourceId = R.raw.joe_pass,
             type = SampleType.GUITAR
         ),
         Sample(
-            name = "Chill",
-            resourceId = R.raw.chill,
+            name = "Nine Inch Nails",
+            resourceId = R.raw.nine_inch_nails,
             type = SampleType.GUITAR
         ),
         Sample(
-            name = "Smooth",
-            resourceId = R.raw.smooth,
+            name = "Ronnie Foster",
+            resourceId = R.raw.ronnie_foster,
             type = SampleType.GUITAR
         ),
         Sample(
-            name = "Warm",
-            resourceId = R.raw.warm,
+            name = "Tom Scout",
+            resourceId = R.raw.tom_scout,
             type = SampleType.GUITAR
         ),
         Sample(
@@ -59,29 +59,29 @@ internal class SampleRepositoryImpl : SampleRepository {
             type = SampleType.DRUM
         ),
         Sample(
-            name = "Air Whistle",
-            resourceId = R.raw.airy_whistle,
-            type = SampleType.TRUMPET
+            name = "Avatar",
+            resourceId = R.raw.avatar,
+            type = SampleType.HORN
         ),
         Sample(
-            name = "Delightful",
-            resourceId = R.raw.delightful_echoes,
-            type = SampleType.TRUMPET
+            name = "Charles Aznavour",
+            resourceId = R.raw.charles_aznavour,
+            type = SampleType.HORN
         ),
         Sample(
-            name = "Ecstasy",
-            resourceId = R.raw.flute_ecstasy,
-            type = SampleType.TRUMPET
+            name = "Future",
+            resourceId = R.raw.future,
+            type = SampleType.HORN
         ),
         Sample(
-            name = "Freshening",
-            resourceId = R.raw.freshening_riff,
-            type = SampleType.TRUMPET
+            name = "J Cole",
+            resourceId = R.raw.j_cole,
+            type = SampleType.HORN
         ),
         Sample(
-            name = "Naruto Flute",
-            resourceId = R.raw.naruto_flute,
-            type = SampleType.TRUMPET
+            name = "Naruto",
+            resourceId = R.raw.narute,
+            type = SampleType.HORN
         )
     )
 

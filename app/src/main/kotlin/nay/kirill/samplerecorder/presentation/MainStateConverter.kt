@@ -75,8 +75,8 @@ class MainStateConverter : (MainState) -> MainUIState {
                     isShort = expandedType != null && expandedType != type
                 )
 
-                SampleType.TRUMPET -> SampleGroupUi(
-                    type = SampleType.TRUMPET,
+                SampleType.HORN -> SampleGroupUi(
+                    type = SampleType.HORN,
                     titleId = R.string.trumpet_sample,
                     iconId = R.drawable.ic_trumpet_sample,
                     contentDescription = "Select guitar sample",
