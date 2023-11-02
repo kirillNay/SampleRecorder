@@ -27,7 +27,9 @@ class MainStateConverter : (MainState) -> MainUIState {
                 timeline = state.amplitude?.let {
                     PlayerTimelineState.Data(
                         amplitude = it,
-                        progress = state.progress
+                        progress = state.progress,
+                        duration = state.duration.toDuration(),
+                        currentPosition = (state.duration * state.progress).toInt().toDuration()
                     )
                 } ?: PlayerTimelineState.Empty,
                 audioControllerState = AudioControllerState(
@@ -37,6 +39,8 @@ class MainStateConverter : (MainState) -> MainUIState {
             )
         }
     }
+
+    private fun Int.toDuration(): String = "${this / 1_000 / 60}".padStart(2,'0') + ":" + "${this / 1_000 % 60}".padStart(2,'0')
 
     private fun MainState.chooserState() = SampleChooserUIState(
         sampleGroups = samples.convertToGroups(selectedSampleId, expandedType)

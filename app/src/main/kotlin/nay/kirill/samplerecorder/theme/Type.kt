@@ -44,7 +44,7 @@ val Typography = Typography(
     ),
     bodySmall = TextStyle(
         fontSize = 12.sp,
-        fontWeight = FontWeight.W300,
+        fontWeight = FontWeight.W500,
         fontFamily = FontFamily.SansSerif,
         lineHeight = 14.sp,
     ),

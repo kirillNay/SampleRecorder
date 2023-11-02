@@ -17,7 +17,8 @@ data class MainState(
     val initialSpeed: Float,
     val initialVolume: Float,
     val speed: Float = 1F,
-    val volume: Float = 1F
+    val volume: Float = 1F,
+    val duration: Int = 0
 ) {
 
     val selectedSample: Sample? get() = samples.find { it.id == selectedSampleId }

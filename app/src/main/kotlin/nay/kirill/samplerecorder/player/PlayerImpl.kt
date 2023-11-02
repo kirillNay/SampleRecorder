@@ -31,6 +31,9 @@ internal class PlayerImpl(
     override val isPlaying: Boolean
         get() = mediaPlayer.isPlaying
 
+    override val duration: Int
+        get() = mediaPlayer.duration
+
     override fun create(resourceId: Int) {
         mediaResId = resourceId
 

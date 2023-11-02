@@ -56,12 +56,14 @@ class MainViewModel(
             return
         }
 
+        onSampleSelected(sample)
+
         state = state.copy(
             selectedSampleId = sample.id,
             expandedType = null,
-            progress = 0F
+            progress = 0F,
+            duration = player.duration
         )
-        onSampleSelected(sample)
     }
 
     private fun reduceExpandSample(intent: MainIntent.SelectSample.Expand) {
@@ -69,17 +71,19 @@ class MainViewModel(
         if (state.expandedType != intent.type) onSampleSelected(sample)
         state = state.copy(
             expandedType = intent.type,
-            selectedSampleId = sample.id
+            selectedSampleId = sample.id,
+            duration = player.duration
         )
     }
 
     private fun reduceSelectSample(intent: MainIntent.SelectSample.Sample) {
+        state.samples.find { it.id == intent.id }?.let(::onSampleSelected)
         state = state.copy(
             selectedSampleId = intent.id,
             expandedType = null,
-            progress = 0F
+            progress = 0F,
+            duration = player.duration
         )
-        state.samples.find { it.id == intent.id }?.let(::onSampleSelected)
     }
 
     private fun onSampleSelected(sample: Sample) {
@@ -89,6 +93,7 @@ class MainViewModel(
             player.playOnce()
         }
         initPlayerObserver()
+        setupAudioParams()
 
         viewModelScope.launch {
             player.getAmplitude()
@@ -103,8 +108,7 @@ class MainViewModel(
             player.pause()
         } else {
             player.playLoop()
-            player.setSpeed(state.speed)
-            player.setVolume(state.volume)
+            setupAudioParams()
         }
     }
 
@@ -160,13 +164,13 @@ class MainViewModel(
         viewModelScope.launch {
             delay(300)
             isAudioParamAvailable = true
-            if (pendingParams != null) {
-                player.setSpeed(pendingParams!!.first)
-                player.setVolume(pendingParams!!.second)
-            }
+            setupAudioParams()
         }
-        player.setSpeed(speed)
-        player.setVolume(volume)
+    }
+
+    private fun setupAudioParams() {
+        player.setSpeed(state.speed)
+        player.setVolume(state.volume)
     }
 
     private var isAudioParamAvailable = true

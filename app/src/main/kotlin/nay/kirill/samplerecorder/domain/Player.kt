@@ -26,6 +26,8 @@ interface Player {
 
     val progress: Flow<Float>
 
+    val duration: Int
+
     sealed interface State {
 
         object UNKNOWN : State
