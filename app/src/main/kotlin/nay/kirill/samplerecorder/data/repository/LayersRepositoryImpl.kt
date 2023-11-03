@@ -27,11 +27,15 @@ internal class LayersRepositoryImpl : LayersRepository {
     override fun getLayers(): List<Layer> = _layersFlow.value
 
     override fun createLayer(): Layer = Layer(
-        id = _layersFlow.value.size + 1,
+        id = (_layersFlow.value.takeIf { it.isNotEmpty() }?.maxOf { it.id } ?: 0) + 1,
         sample = null,
         speed = 1F,
         volume = 1F
     )
         .also(::addLayer)
+
+    override fun removeLayer(id: Int) {
+        _layersFlow.value = _layersFlow.value.toMutableList().apply { removeIf { it.id == id } }
+    }
 
 }

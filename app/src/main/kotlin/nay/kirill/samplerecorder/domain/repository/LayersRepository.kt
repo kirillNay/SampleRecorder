@@ -13,6 +13,8 @@ interface LayersRepository {
 
     fun createLayer(): Layer
 
+    fun removeLayer(id: Int)
+
     val layersFlow: Flow<List<Layer>>
 
 }

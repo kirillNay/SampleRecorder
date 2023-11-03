@@ -13,6 +13,7 @@ import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
 import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
+import nay.kirill.samplerecorder.domain.usecase.RemoveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
 import kotlin.math.ln
 
@@ -22,7 +23,8 @@ class MainViewModel(
     private val getSamplesUseCase: GetSamplesUseCase,
     private val saveLayerUseCase: SaveLayerUseCase,
     private val createLayerUseCase: CreateLayerUseCase,
-    private val observeLayersUseCase: ObserveLayersUseCase
+    private val observeLayersUseCase: ObserveLayersUseCase,
+    private val removeLayerUseCase: RemoveLayerUseCase
 ) : ViewModel() {
 
     private val layersFlow = observeLayersUseCase()
@@ -63,6 +65,7 @@ class MainViewModel(
             is MainIntent.PlayerController.LayersModal -> reduceOpenLayerModal(intent)
             is MainIntent.Layers.SelectLayer -> reduceSelectLayer(intent)
             is MainIntent.Layers.CreateNew -> reduceNewLayer()
+            is MainIntent.Layers.RemoveLayer -> reduceRemoveLayer(intent)
         }
     }
 
@@ -75,12 +78,17 @@ class MainViewModel(
         resetStateWithLayer(layer)
     }
 
+    private fun reduceRemoveLayer(intent: MainIntent.Layers.RemoveLayer) {
+        removeLayerUseCase(intent.id)
+    }
+
     private fun resetStateWithLayer(layer: Layer) {
         player.stopAndRelease()
         state = MainState(
             samples = state.samples,
             currentLayer = layer,
-            layers = state.layers
+            layers = state.layers,
+            isLayersOpen = true
         )
         layer.sample?.let(::onSampleSelected)
     }
@@ -109,8 +117,6 @@ class MainViewModel(
     }
 
     private fun reduceExpandSample(intent: MainIntent.SelectSample.Expand) {
-//        val sample = state.samples.first { it.type == intent.type }
-//        if (state.expandedType != intent.type) onSampleSelected(sample)
         state = state.copy(
             expandedType = intent.type,
             currentLayer = state.currentLayer,

@@ -30,6 +30,8 @@ sealed interface MainIntent {
 
         object CreateNew : Layers
 
+        data class RemoveLayer(val id: Int) : Layers
+
     }
 
     sealed interface AudioParams : MainIntent {

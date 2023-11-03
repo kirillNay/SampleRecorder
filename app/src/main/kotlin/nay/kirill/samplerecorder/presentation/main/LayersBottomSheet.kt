@@ -1,5 +1,7 @@
 package nay.kirill.samplerecorder.presentation.main
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,15 +29,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.presentation.main.theme.SampleRecorderTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun LayersBottomSheet(
     open: Boolean,
@@ -60,9 +66,11 @@ internal fun LayersBottomSheet(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(layers) { layer ->
-                        Layer(layer) {
-                            accept(MainIntent.Layers.SelectLayer(layer.id))
-                        }
+                        Layer(
+                            modifier = Modifier.animateItemPlacement(),
+                            layer = layer,
+                            accept = accept
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
@@ -79,7 +87,7 @@ internal fun LayersBottomSheet(
 private fun Layer(
     layer: LayerUi,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    accept: (MainIntent.Layers) -> Unit
 ) {
     @Composable
     fun Modifier.borderInCase(show: Boolean): Modifier = if (show) {
@@ -93,16 +101,37 @@ private fun Layer(
             .fillMaxWidth()
             .height(64.dp)
             .clip(RoundedCornerShape(15))
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .borderInCase(layer.isSelected)
-            .clickable(onClick = onClick, enabled = !layer.isSelected),
+            .clickable(
+                onClick = {
+                    accept(MainIntent.Layers.SelectLayer(layer.id))
+                },
+                enabled = !layer.isSelected
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = layer.name.uppercase(),
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.onSecondaryContainer
         )
+        if (!layer.isSelected) {
+            Image(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        accept(MainIntent.Layers.RemoveLayer(layer.id))
+                    }
+                    .padding(6.dp),
+                painter = painterResource(id = R.drawable.ic_remove),
+                contentDescription = "Remove layer",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.outlineVariant)
+            )
+        }
     }
 }
 
@@ -146,45 +175,42 @@ private fun CreateNew(
 @Composable
 private fun BottomSheetPreview() {
     SampleRecorderTheme {
-        Scaffold { contentPadding ->
-            LayersBottomSheet(
-                layers = listOf(
-                    LayerUi(
-                        1,
-                        "Слой 1",
-                        false
-                    ),
-                    LayerUi(
-                        2,
-                        "Слой 1",
-                        false
-                    ),
-                    LayerUi(
-                        3,
-                        "Слой 1",
-                        false
-                    ),
-                    LayerUi(
-                        4,
-                        "Слой 1",
-                        false
-                    ),
-                    LayerUi(
-                        5,
-                        "Слой 1",
-                        false
-                    ),
-                    LayerUi(
-                        6,
-                        "Слой 1",
-                        false
-                    ),
+        LayersBottomSheet(
+            layers = listOf(
+                LayerUi(
+                    1,
+                    "Слой 1",
+                    false
                 ),
-                open = true
-            ) {
+                LayerUi(
+                    2,
+                    "Слой 1",
+                    false
+                ),
+                LayerUi(
+                    3,
+                    "Слой 1",
+                    false
+                ),
+                LayerUi(
+                    4,
+                    "Слой 1",
+                    false
+                ),
+                LayerUi(
+                    5,
+                    "Слой 1",
+                    false
+                ),
+                LayerUi(
+                    6,
+                    "Слой 1",
+                    false
+                ),
+            ),
+            open = true
+        ) {
 
-            }
         }
-
     }
 }
