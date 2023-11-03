@@ -23,12 +23,13 @@ const val INITIAL_VOLUME_VALUE = 50F
 data class MainState(
     val samples: List<Sample>,
     val currentLayer: Layer,
+    val layers: List<Layer> = emptyList(),
     val expandedType: SampleType? = null,
     val isPlaying: Boolean = false,
     val amplitude: List<Float>? = null,
-    val progress: Float,
-    val initialSpeedScale: Float,
-    val initialVolumeScale: Float,
+    val progress: Float = 0F,
+    val initialSpeedScale: Float = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
+    val initialVolumeScale: Float = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE),
     val duration: Int = 0,
     val isLayersOpen: Boolean = false
 ) {
@@ -43,21 +44,31 @@ sealed interface MainUIState {
 
     val isLayersModalOpen: Boolean
 
+    val layers: List<LayerUi>
+
     data class Empty(
         override val chooserState: SampleChooserUIState,
         override val isLayersModalOpen: Boolean,
-        val layerName: String
+        override val layers: List<LayerUi>,
+        val layerName: String,
     ) : MainUIState
 
     data class Sampling(
         override val chooserState: SampleChooserUIState,
         override val isLayersModalOpen: Boolean,
+        override val layers: List<LayerUi>,
         val playerControllerState: PlayerControllerState,
         val timeline: PlayerTimelineState,
         val audioControllerState: AudioControllerState
     ) : MainUIState
 
 }
+
+data class LayerUi(
+    val id: Int,
+    val name: String,
+    val isSelected: Boolean
+)
 
 // Previews
 internal class MainUIStateProvider : PreviewParameterProvider<MainUIState> {
@@ -132,12 +143,14 @@ internal class MainUIStateProvider : PreviewParameterProvider<MainUIState> {
         MainUIState.Empty(
             chooserState = SampleChooserUIState(sampleGroups = sampleGroups),
             isLayersModalOpen = false,
-            layerName = "Layer 1"
+            layerName = "Layer 1",
+            layers = emptyList()
         ),
         MainUIState.Empty(
             chooserState = SampleChooserUIState(sampleGroups = sampleGroups1),
             isLayersModalOpen = true,
-            layerName = "Layer 1"
+            layerName = "Layer 1",
+            layers = emptyList()
         ),
     )
 

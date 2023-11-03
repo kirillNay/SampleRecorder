@@ -12,6 +12,8 @@ interface Player {
 
     fun pause()
 
+    fun stopAndRelease()
+
     fun setSpeed(speed: Float)
 
     fun setVolume(volume: Float)
@@ -41,6 +43,8 @@ interface Player {
         object Play : State
 
         object Pause : State
+
+        object Released : State
 
     }
 

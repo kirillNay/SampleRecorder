@@ -44,6 +44,7 @@ internal fun MainScreen(
         Scaffold{  contentPadding ->
             LayersBottomSheet(
                 open = state.isLayersModalOpen,
+                layers = state.layers,
                 accept = viewModel::accept
             )
 

@@ -24,6 +24,14 @@ sealed interface MainIntent {
 
     }
 
+    sealed interface Layers : MainIntent {
+
+        data class SelectLayer(val id: Int) : Layers
+
+        object CreateNew : Layers
+
+    }
+
     sealed interface AudioParams : MainIntent {
 
         data class NewParams(

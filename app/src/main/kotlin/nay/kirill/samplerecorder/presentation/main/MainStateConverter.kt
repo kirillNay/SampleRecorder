@@ -2,6 +2,7 @@ package nay.kirill.samplerecorder.presentation.main
 
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.ResourceManager
+import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
 import nay.kirill.samplerecorder.domain.model.SampleType
 import nay.kirill.samplerecorder.presentation.main.audioController.AudioControllerState
@@ -20,15 +21,17 @@ class MainStateConverter(
             null -> MainUIState.Empty(
                 chooserState = state.chooserState(),
                 isLayersModalOpen = state.isLayersOpen,
-                layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id)
+                layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
+                layers = state.layers.toUI(selectedId = state.currentLayer.id)
             )
 
             else -> MainUIState.Sampling(
                 chooserState = state.chooserState(),
+                layers = state.layers.toUI(selectedId = state.currentLayer.id),
                 playerControllerState = PlayerControllerState(
                     playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
                     contentDescription = if (state.isPlaying) "Stop" else "Play",
-                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id)
+                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
                 ),
                 timeline = state.amplitude?.let {
                     PlayerTimelineState.Data(
@@ -49,6 +52,14 @@ class MainStateConverter(
                 isLayersModalOpen = state.isLayersOpen
             )
         }
+    }
+
+    private fun List<Layer>.toUI(selectedId: Int): List<LayerUi> = map {
+        LayerUi(
+            id = it.id,
+            name = resourceManager.getString(R.string.layer_name, it.id),
+            isSelected = it.id == selectedId
+        )
     }
 
     private fun Int.toDuration(): String = "${this / 1_000 / 60}".padStart(2, '0') + ":" + "${this / 1_000 % 60}".padStart(2, '0')

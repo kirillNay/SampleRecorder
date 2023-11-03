@@ -9,25 +9,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.Player
+import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
 import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
+import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
 import kotlin.math.ln
 
 class MainViewModel(
     private val stateConverter: MainStateConverter,
     private val player: Player,
-    getSamplesUseCase: GetSamplesUseCase,
+    private val getSamplesUseCase: GetSamplesUseCase,
     private val saveLayerUseCase: SaveLayerUseCase,
-    private val createLayerUseCase: CreateLayerUseCase
+    private val createLayerUseCase: CreateLayerUseCase,
+    private val observeLayersUseCase: ObserveLayersUseCase
 ) : ViewModel() {
+
+    private val layersFlow = observeLayersUseCase()
 
     private var state: MainState = MainState(
         samples = getSamplesUseCase(),
-        currentLayer = createLayerUseCase(),
-        progress = 0F,
-        initialSpeedScale = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
-        initialVolumeScale = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE),
+        currentLayer = createLayerUseCase()
     )
         private set(value) {
             if (value == field) return
@@ -42,6 +44,14 @@ class MainViewModel(
     private var playerStateObserverJob: Job? = null
     private var playerProgressObserverJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            layersFlow.collect {
+                state = state.copy(layers = it)
+            }
+        }
+    }
+
     fun accept(intent: MainIntent) {
         when (intent) {
             is MainIntent.SelectSample.Default -> reduceDefaultSample(intent)
@@ -51,7 +61,28 @@ class MainViewModel(
             is MainIntent.AudioParams.NewParams -> reduceNewAudioParams(intent)
             is MainIntent.PlayerController.Seek -> reduceSeekPlayer(intent)
             is MainIntent.PlayerController.LayersModal -> reduceOpenLayerModal(intent)
+            is MainIntent.Layers.SelectLayer -> reduceSelectLayer(intent)
+            is MainIntent.Layers.CreateNew -> reduceNewLayer()
         }
+    }
+
+    private fun reduceSelectLayer(intent: MainIntent.Layers.SelectLayer) {
+        state.layers.find { it.id == intent.id }?.let(::resetStateWithLayer)
+    }
+
+    private fun reduceNewLayer() {
+        val layer = createLayerUseCase()
+        resetStateWithLayer(layer)
+    }
+
+    private fun resetStateWithLayer(layer: Layer) {
+        player.stopAndRelease()
+        state = MainState(
+            samples = state.samples,
+            currentLayer = layer,
+            layers = state.layers
+        )
+        layer.sample?.let(::onSampleSelected)
     }
 
     private fun reduceOpenLayerModal(intent: MainIntent.PlayerController.LayersModal) {
@@ -67,6 +98,7 @@ class MainViewModel(
         }
 
         onSampleSelected(sample)
+        saveLayerUseCase(state.currentLayer.copy(sample = sample))
 
         state = state.copy(
             currentLayer = state.currentLayer.copy(sample = sample),
@@ -77,11 +109,11 @@ class MainViewModel(
     }
 
     private fun reduceExpandSample(intent: MainIntent.SelectSample.Expand) {
-        val sample = state.samples.first { it.type == intent.type }
-        if (state.expandedType != intent.type) onSampleSelected(sample)
+//        val sample = state.samples.first { it.type == intent.type }
+//        if (state.expandedType != intent.type) onSampleSelected(sample)
         state = state.copy(
             expandedType = intent.type,
-            currentLayer = state.currentLayer.copy(sample = sample),
+            currentLayer = state.currentLayer,
             duration = player.duration
         )
     }
@@ -89,6 +121,7 @@ class MainViewModel(
     private fun reduceSelectSample(intent: MainIntent.SelectSample.Sample) {
         val sample = state.samples.find { it.id == intent.id } ?: return
         onSampleSelected(sample)
+        saveLayerUseCase(state.currentLayer.copy(sample = sample))
 
         state = state.copy(
             currentLayer = state.currentLayer.copy(sample = sample),
@@ -99,8 +132,6 @@ class MainViewModel(
     }
 
     private fun onSampleSelected(sample: Sample) {
-        saveLayerUseCase(state.currentLayer.copy(sample = sample))
-
         player.create(sample.resourceId, state.currentLayer.speed, state.currentLayer.volume)
         viewModelScope.launch {
             delay(SELECTED_SAMPLE_PLAY_DELAY)

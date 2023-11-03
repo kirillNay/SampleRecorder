@@ -1,6 +1,7 @@
 package nay.kirill.samplerecorder.presentation.di
 
 import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
+import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
 import nay.kirill.samplerecorder.presentation.main.MainStateConverter
@@ -16,4 +17,5 @@ internal val mainModule = module {
     factoryOf(::GetSamplesUseCase)
     factoryOf(::SaveLayerUseCase)
     factoryOf(::CreateLayerUseCase)
+    factoryOf(::ObserveLayersUseCase)
 }

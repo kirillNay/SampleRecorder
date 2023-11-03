@@ -1,5 +1,6 @@
 package nay.kirill.samplerecorder.domain.repository
 
+import kotlinx.coroutines.flow.Flow
 import nay.kirill.samplerecorder.domain.model.Layer
 
 interface LayersRepository {
@@ -11,5 +12,7 @@ interface LayersRepository {
     fun getLayers(): List<Layer>
 
     fun createLayer(): Layer
+
+    val layersFlow: Flow<List<Layer>>
 
 }

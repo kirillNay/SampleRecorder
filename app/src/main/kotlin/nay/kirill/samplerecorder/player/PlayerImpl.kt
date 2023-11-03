@@ -37,9 +37,7 @@ internal class PlayerImpl(
     override fun create(resourceId: Int, speed: Float, volume: Float) {
         mediaResId = resourceId
 
-        stopProgressTimer()
-        _mediaPlayer?.stop()
-        _mediaPlayer?.release()
+        releasePlayer()
         _mediaPlayer = MediaPlayer.create(context, resourceId)
         _mediaPlayer?.setOnCompletionListener {
             state.value = Player.State.Completed
@@ -115,6 +113,10 @@ internal class PlayerImpl(
         state.value = Player.State.Pause
     }
 
+    override fun stopAndRelease() {
+        releasePlayer()
+    }
+
     override fun setSpeed(speed: Float) {
         mediaPlayer.playbackParams = mediaPlayer.playbackParams.apply { this.speed = speed }
     }
@@ -126,6 +128,15 @@ internal class PlayerImpl(
     override fun seekTo(value: Float) {
         _progress.value = value
         mediaPlayer.seekTo((mediaPlayer.duration * value).toInt())
+    }
+
+    private fun releasePlayer() {
+        if (state.value != Player.State.Released) {
+            stopProgressTimer()
+            _mediaPlayer?.stop()
+            _mediaPlayer?.release()
+            state.value = Player.State.Released
+        }
     }
 
     companion object {
