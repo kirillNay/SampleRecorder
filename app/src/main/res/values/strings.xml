@@ -9,4 +9,5 @@
     <string name="speed">Скорость</string>
 
     <string name="no_sample_message">Выберите семпл, чтобы продолжить</string>
+    <string name="layer_name">Слой #%d</string>
 </resources>
