@@ -16,4 +16,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "SampleRecorder"
 include(":app")
- 
+include(":parselib")
+include(":iolib")
+include(":resampler")
