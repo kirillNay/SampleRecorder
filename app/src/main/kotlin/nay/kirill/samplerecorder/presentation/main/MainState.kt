@@ -6,6 +6,7 @@ import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
 import nay.kirill.samplerecorder.domain.model.SampleType
 import nay.kirill.samplerecorder.presentation.main.audioController.AudioControllerState
+import nay.kirill.samplerecorder.presentation.main.layers.LayersBottomSheetState
 import nay.kirill.samplerecorder.presentation.main.playerController.PlayerControllerState
 import nay.kirill.samplerecorder.presentation.main.playerTimeline.PlayerTimelineState
 import nay.kirill.samplerecorder.presentation.main.sampleChooser.SampleChooserUIState
@@ -41,26 +42,25 @@ data class MainState(
 
 sealed interface MainUIState {
 
-    val chooserState: SampleChooserUIState
-
-    val isLayersModalOpen: Boolean
-
-    val layers: List<LayerUi>
-
     val playerControllerState: PlayerControllerState
 
+    val layersBottomSheetState: LayersBottomSheetState
+
+    data class Recording(
+        override val playerControllerState: PlayerControllerState.EmptySample,
+        override val layersBottomSheetState: LayersBottomSheetState
+    ) : MainUIState
+
     data class Empty(
-        override val chooserState: SampleChooserUIState,
-        override val isLayersModalOpen: Boolean,
-        override val layers: List<LayerUi>,
-        override val playerControllerState: PlayerControllerState,
+        override val playerControllerState: PlayerControllerState.EmptySample,
+        override val layersBottomSheetState: LayersBottomSheetState,
+        val chooserState: SampleChooserUIState,
     ) : MainUIState
 
     data class Sampling(
-        override val chooserState: SampleChooserUIState,
-        override val isLayersModalOpen: Boolean,
-        override val layers: List<LayerUi>,
         override val playerControllerState: PlayerControllerState,
+        override val layersBottomSheetState: LayersBottomSheetState,
+        val chooserState: SampleChooserUIState,
         val timeline: PlayerTimelineState,
         val audioControllerState: AudioControllerState
     ) : MainUIState
@@ -145,20 +145,26 @@ internal class MainUIStateProvider : PreviewParameterProvider<MainUIState> {
     override val values: Sequence<MainUIState> = sequenceOf(
         MainUIState.Empty(
             chooserState = SampleChooserUIState(sampleGroups = sampleGroups),
-            isLayersModalOpen = false,
-            layers = emptyList(),
             playerControllerState = PlayerControllerState.EmptySample(
                 layerName = "Слой 1",
                 isRecording = false
+            ),
+            layersBottomSheetState = LayersBottomSheetState(
+                opened = false,
+                layers = emptyList(),
+                editAvailable = false
             )
         ),
         MainUIState.Empty(
             chooserState = SampleChooserUIState(sampleGroups = sampleGroups1),
-            isLayersModalOpen = true,
-            layers = emptyList(),
             playerControllerState = PlayerControllerState.EmptySample(
                 layerName = "Слой 1",
                 isRecording = true
+            ),
+            layersBottomSheetState = LayersBottomSheetState(
+                opened = false,
+                layers = emptyList(),
+                editAvailable = false
             )
         ),
     )

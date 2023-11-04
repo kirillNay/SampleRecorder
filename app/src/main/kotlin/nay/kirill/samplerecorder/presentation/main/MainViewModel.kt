@@ -71,7 +71,17 @@ class MainViewModel(
     }
 
     private fun reduceOnLayer() {
-        state = state.copy(isRecording = !state.isRecording)
+        when {
+            state.isRecording -> {
+                // TODO update layer
+                state = state.copy(isRecording = false)
+            }
+            else -> {
+                state = state.copy(isRecording = true)
+                player.pause()
+            }
+        }
+
     }
 
     private fun reduceSelectLayer(intent: MainIntent.Layers.SelectLayer) {
@@ -92,8 +102,7 @@ class MainViewModel(
         state = MainState(
             samples = state.samples,
             currentLayer = layer,
-            layers = state.layers,
-            isLayersOpen = true
+            layers = state.layers
         )
         layer.sample?.let(::onSampleSelected)
     }

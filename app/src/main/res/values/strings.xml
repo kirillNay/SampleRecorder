@@ -12,4 +12,6 @@
     <string name="layer_name">Слой #%d</string>
 
     <string name="create_new_layer">Создать новый</string>
+
+    <string name="record_on_process">Происходит запись с микрофона</string>
 </resources>

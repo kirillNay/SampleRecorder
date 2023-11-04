@@ -1,4 +1,4 @@
-package nay.kirill.samplerecorder.presentation.main
+package nay.kirill.samplerecorder.presentation.main.layers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -20,10 +20,10 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,22 +35,24 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import nay.kirill.samplerecorder.R
+import nay.kirill.samplerecorder.presentation.main.LayerUi
+import nay.kirill.samplerecorder.presentation.main.MainIntent
 import nay.kirill.samplerecorder.presentation.main.theme.SampleRecorderTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun LayersBottomSheet(
-    open: Boolean,
-    layers: List<LayerUi>,
+    state: LayersBottomSheetState,
     accept: (MainIntent) -> Unit
 ) {
     val modalBottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
 
-    if (open) {
+    if (state.opened) {
         ModalBottomSheet(
             onDismissRequest = { accept(MainIntent.PlayerController.LayersModal(false)) },
             sheetState = modalBottomSheetState,
@@ -61,22 +63,29 @@ internal fun LayersBottomSheet(
                     .padding(vertical = 18.dp, horizontal = 12.dp),
                 contentAlignment = Alignment.BottomCenter
             ) {
+                val bottomPadding = remember(state.editAvailable) {
+                    if (state.editAvailable) 68.dp else 0.dp
+                }
                 LazyColumn(
-                    modifier = Modifier.padding(bottom = 68.dp),
+                    modifier = Modifier.padding(bottom = bottomPadding),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(layers) { layer ->
+                    items(state.layers) { layer ->
                         Layer(
                             modifier = Modifier.animateItemPlacement(),
                             layer = layer,
+                            removeAvailable = state.editAvailable,
                             accept = accept
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                CreateNew {
-                    accept(MainIntent.Layers.CreateNew)
+                if (state.editAvailable) {
+                    CreateNew {
+                        accept(MainIntent.Layers.CreateNew)
+                    }
                 }
+
             }
         }
     }
@@ -86,6 +95,7 @@ internal fun LayersBottomSheet(
 @Composable
 private fun Layer(
     layer: LayerUi,
+    removeAvailable: Boolean,
     modifier: Modifier = Modifier,
     accept: (MainIntent.Layers) -> Unit
 ) {
@@ -116,7 +126,7 @@ private fun Layer(
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSecondaryContainer
         )
-        if (!layer.isSelected) {
+        if (!layer.isSelected && removeAvailable) {
             Image(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
@@ -173,44 +183,10 @@ private fun CreateNew(
 
 @Preview
 @Composable
-private fun BottomSheetPreview() {
+private fun BottomSheetPreview(
+    @PreviewParameter(LayersBottomSheetStateProvider::class) state: LayersBottomSheetState
+) {
     SampleRecorderTheme {
-        LayersBottomSheet(
-            layers = listOf(
-                LayerUi(
-                    1,
-                    "Слой 1",
-                    false
-                ),
-                LayerUi(
-                    2,
-                    "Слой 1",
-                    false
-                ),
-                LayerUi(
-                    3,
-                    "Слой 1",
-                    false
-                ),
-                LayerUi(
-                    4,
-                    "Слой 1",
-                    false
-                ),
-                LayerUi(
-                    5,
-                    "Слой 1",
-                    false
-                ),
-                LayerUi(
-                    6,
-                    "Слой 1",
-                    false
-                ),
-            ),
-            open = true
-        ) {
-
-        }
+        LayersBottomSheet(state = state) {}
     }
 }

@@ -23,8 +23,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.presentation.main.audioController.AudioController
+import nay.kirill.samplerecorder.presentation.main.layers.LayersBottomSheet
 import nay.kirill.samplerecorder.presentation.main.playerController.PlayerController
 import nay.kirill.samplerecorder.presentation.main.playerTimeline.PlayerTimeline
 import nay.kirill.samplerecorder.presentation.main.sampleChooser.SampleChooser
@@ -49,8 +55,7 @@ private fun Content(
 ) {
     Scaffold { contentPadding ->
         LayersBottomSheet(
-            open = state.isLayersModalOpen,
-            layers = state.layers,
+            state = state.layersBottomSheetState,
             accept = accept
         )
 
@@ -66,14 +71,58 @@ private fun Content(
             color = MaterialTheme.colorScheme.background
         ) {
             when (state) {
-                is MainUIState.Empty -> Empty(state, accept)
-                is MainUIState.Sampling -> Sampling(state, accept)
+                is MainUIState.Empty -> {
+                    Empty(state, accept)
+                    SampleChooser(
+                        state = state.chooserState,
+                        accept = accept
+                    )
+                }
+                is MainUIState.Sampling -> {
+                    Sampling(state, accept)
+                    SampleChooser(
+                        state = state.chooserState,
+                        accept = accept
+                    )
+                }
+                is MainUIState.Recording -> {
+                    Recording(state, accept)
+                }
             }
-            SampleChooser(
-                state = state.chooserState,
-                accept = accept
-            )
+
         }
+    }
+}
+
+@Composable
+private fun Recording(
+    state: MainUIState.Recording,
+    accept: (MainIntent) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(250.dp))
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie_recording))
+        val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+
+        LottieAnimation(
+            modifier = Modifier.size(96.dp),
+            composition = composition,
+            progress = { progress },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(id = R.string.record_on_process),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+        Spacer(Modifier.weight(1F))
+        PlayerController(
+            state = state.playerControllerState,
+            accept = accept
+        )
     }
 }
 
