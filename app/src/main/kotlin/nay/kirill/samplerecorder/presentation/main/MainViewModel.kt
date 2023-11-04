@@ -20,11 +20,11 @@ import kotlin.math.ln
 class MainViewModel(
     private val stateConverter: MainStateConverter,
     private val player: Player,
-    private val getSamplesUseCase: GetSamplesUseCase,
     private val saveLayerUseCase: SaveLayerUseCase,
     private val createLayerUseCase: CreateLayerUseCase,
-    private val observeLayersUseCase: ObserveLayersUseCase,
-    private val removeLayerUseCase: RemoveLayerUseCase
+    private val removeLayerUseCase: RemoveLayerUseCase,
+    observeLayersUseCase: ObserveLayersUseCase,
+    getSamplesUseCase: GetSamplesUseCase
 ) : ViewModel() {
 
     private val layersFlow = observeLayersUseCase()
@@ -63,10 +63,15 @@ class MainViewModel(
             is MainIntent.AudioParams.NewParams -> reduceNewAudioParams(intent)
             is MainIntent.PlayerController.Seek -> reduceSeekPlayer(intent)
             is MainIntent.PlayerController.LayersModal -> reduceOpenLayerModal(intent)
+            is MainIntent.PlayerController.OnRecord -> reduceOnLayer()
             is MainIntent.Layers.SelectLayer -> reduceSelectLayer(intent)
             is MainIntent.Layers.CreateNew -> reduceNewLayer()
             is MainIntent.Layers.RemoveLayer -> reduceRemoveLayer(intent)
         }
+    }
+
+    private fun reduceOnLayer() {
+        state = state.copy(isRecording = !state.isRecording)
     }
 
     private fun reduceSelectLayer(intent: MainIntent.Layers.SelectLayer) {
@@ -118,9 +123,7 @@ class MainViewModel(
 
     private fun reduceExpandSample(intent: MainIntent.SelectSample.Expand) {
         state = state.copy(
-            expandedType = intent.type,
-            currentLayer = state.currentLayer,
-            duration = player.duration
+            expandedType = intent.type
         )
     }
 

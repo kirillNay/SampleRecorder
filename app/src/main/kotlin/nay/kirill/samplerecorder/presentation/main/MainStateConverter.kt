@@ -21,17 +21,21 @@ class MainStateConverter(
             null -> MainUIState.Empty(
                 chooserState = state.chooserState(),
                 isLayersModalOpen = state.isLayersOpen,
-                layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
-                layers = state.layers.toUI(selectedId = state.currentLayer.id)
+                layers = state.layers.toUI(selectedId = state.currentLayer.id),
+                playerControllerState = PlayerControllerState.EmptySample(
+                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
+                    isRecording = state.isRecording
+                )
             )
 
             else -> MainUIState.Sampling(
                 chooserState = state.chooserState(),
                 layers = state.layers.toUI(selectedId = state.currentLayer.id),
-                playerControllerState = PlayerControllerState(
+                playerControllerState = PlayerControllerState.Sampling(
                     playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
                     contentDescription = if (state.isPlaying) "Stop" else "Play",
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
+                    isRecording = state.isRecording
                 ),
                 timeline = state.amplitude?.let {
                     PlayerTimelineState.Data(

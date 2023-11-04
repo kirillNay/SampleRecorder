@@ -22,6 +22,8 @@ sealed interface MainIntent {
 
         data class LayersModal(val open: Boolean) : PlayerController
 
+        object OnRecord : PlayerController
+
     }
 
     sealed interface Layers : MainIntent {

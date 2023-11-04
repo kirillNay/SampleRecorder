@@ -1,7 +1,6 @@
 package nay.kirill.samplerecorder.presentation.main
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -27,7 +25,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.presentation.main.audioController.AudioController
-import nay.kirill.samplerecorder.presentation.main.playerController.LayerChooser
 import nay.kirill.samplerecorder.presentation.main.playerController.PlayerController
 import nay.kirill.samplerecorder.presentation.main.playerTimeline.PlayerTimeline
 import nay.kirill.samplerecorder.presentation.main.sampleChooser.SampleChooser
@@ -41,21 +38,7 @@ internal fun MainScreen(
     val state by viewModel.uiState.collectAsState()
 
     SampleRecorderTheme {
-        Scaffold{  contentPadding ->
-            LayersBottomSheet(
-                open = state.isLayersModalOpen,
-                layers = state.layers,
-                accept = viewModel::accept
-            )
-
-            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                Content(
-                    state = state,
-                    accept = viewModel::accept
-                )
-            }
-        }
-
+            Content(state = state, accept = viewModel::accept)
     }
 }
 
@@ -64,65 +47,89 @@ private fun Content(
     state: MainUIState,
     accept: (MainIntent) -> Unit
 ) {
-    Box(
+    Scaffold { contentPadding ->
+        LayersBottomSheet(
+            open = state.isLayersModalOpen,
+            layers = state.layers,
+            accept = accept
+        )
+
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = 18.dp + contentPadding.calculateTopPadding(),
+                    bottom = 18.dp + contentPadding.calculateBottomPadding(),
+                    start = 12.dp,
+                    end = 12.dp
+                ),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            when (state) {
+                is MainUIState.Empty -> Empty(state, accept)
+                is MainUIState.Sampling -> Sampling(state, accept)
+            }
+            SampleChooser(
+                state = state.chooserState,
+                accept = accept
+            )
+        }
+    }
+}
+
+@Composable
+private fun Empty(
+    state: MainUIState.Empty,
+    accept: (MainIntent) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(250.dp))
+        Image(
+            painter = painterResource(id = R.drawable.ic_audio_wave),
+            contentDescription = "Audio wave",
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant),
+            modifier = Modifier.size(96.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(id = R.string.no_sample_message),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+        Spacer(Modifier.weight(1F))
+        PlayerController(
+            state = state.playerControllerState,
+            accept = accept
+        )
+    }
+}
+
+@Composable
+private fun Sampling(
+    state: MainUIState.Sampling,
+    accept: (MainIntent) -> Unit
+) {
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 18.dp, horizontal = 12.dp)
     ) {
-        when (state) {
-            is MainUIState.Empty -> Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(250.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.ic_audio_wave),
-                    contentDescription = "Audio wave",
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant),
-                    modifier = Modifier.size(96.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = stringResource(id = R.string.no_sample_message),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                )
-                Spacer(Modifier.weight(1F))
-                LayerChooser(
-                    modifier = Modifier
-                        .width(200.dp)
-                        .height(48.dp),
-                    name = state.layerName
-                ) {
-                    accept(MainIntent.PlayerController.LayersModal(open = true))
-                }
-            }
-
-            is MainUIState.Sampling -> Column(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                Spacer(modifier = Modifier.height(170.dp))
-                AudioController(
-                    modifier = Modifier.weight(1F),
-                    state = state.audioControllerState,
-                    accept = accept
-                )
-                Spacer(modifier = Modifier.height(18.dp))
-                PlayerTimeline(
-                    state = state.timeline,
-                    accept = accept
-                )
-                Spacer(modifier = Modifier.height(18.dp))
-                PlayerController(
-                    state = state.playerControllerState,
-                    accept = accept
-                )
-            }
-        }
-
-        SampleChooser(
-            state = state.chooserState,
+        Spacer(modifier = Modifier.height(170.dp))
+        AudioController(
+            modifier = Modifier.weight(1F),
+            state = state.audioControllerState,
+            accept = accept
+        )
+        Spacer(modifier = Modifier.height(18.dp))
+        PlayerTimeline(
+            state = state.timeline,
+            accept = accept
+        )
+        Spacer(modifier = Modifier.height(18.dp))
+        PlayerController(
+            state = state.playerControllerState,
             accept = accept
         )
     }
@@ -133,8 +140,6 @@ private fun Content(
 private fun MainScreenPreview(
     @PreviewParameter(MainUIStateProvider::class) state: MainUIState
 ) {
-    SampleRecorderTheme {
-        Content(state = state) {}
-    }
+    Content(state = state) {}
 }
 

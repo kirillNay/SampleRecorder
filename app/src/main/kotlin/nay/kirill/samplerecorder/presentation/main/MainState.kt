@@ -31,7 +31,8 @@ data class MainState(
     val initialSpeedScale: Float = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
     val initialVolumeScale: Float = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE),
     val duration: Int = 0,
-    val isLayersOpen: Boolean = false
+    val isLayersOpen: Boolean = false,
+    val isRecording: Boolean = false
 ) {
 
     val selectedSample: Sample? get() = currentLayer.sample
@@ -46,18 +47,20 @@ sealed interface MainUIState {
 
     val layers: List<LayerUi>
 
+    val playerControllerState: PlayerControllerState
+
     data class Empty(
         override val chooserState: SampleChooserUIState,
         override val isLayersModalOpen: Boolean,
         override val layers: List<LayerUi>,
-        val layerName: String,
+        override val playerControllerState: PlayerControllerState,
     ) : MainUIState
 
     data class Sampling(
         override val chooserState: SampleChooserUIState,
         override val isLayersModalOpen: Boolean,
         override val layers: List<LayerUi>,
-        val playerControllerState: PlayerControllerState,
+        override val playerControllerState: PlayerControllerState,
         val timeline: PlayerTimelineState,
         val audioControllerState: AudioControllerState
     ) : MainUIState
@@ -143,14 +146,20 @@ internal class MainUIStateProvider : PreviewParameterProvider<MainUIState> {
         MainUIState.Empty(
             chooserState = SampleChooserUIState(sampleGroups = sampleGroups),
             isLayersModalOpen = false,
-            layerName = "Layer 1",
-            layers = emptyList()
+            layers = emptyList(),
+            playerControllerState = PlayerControllerState.EmptySample(
+                layerName = "Слой 1",
+                isRecording = false
+            )
         ),
         MainUIState.Empty(
             chooserState = SampleChooserUIState(sampleGroups = sampleGroups1),
             isLayersModalOpen = true,
-            layerName = "Layer 1",
-            layers = emptyList()
+            layers = emptyList(),
+            playerControllerState = PlayerControllerState.EmptySample(
+                layerName = "Слой 1",
+                isRecording = true
+            )
         ),
     )
 

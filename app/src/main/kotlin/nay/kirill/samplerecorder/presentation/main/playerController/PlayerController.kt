@@ -1,5 +1,6 @@
 package nay.kirill.samplerecorder.presentation.main.playerController
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,12 +15,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.presentation.main.MainIntent
@@ -33,11 +36,13 @@ internal fun PlayerController(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp),
+            .height(64.dp),
+        verticalAlignment = Alignment.CenterVertically
     ){
         Box(
             modifier = Modifier
                 .weight(1F)
+                .height(48.dp)
                 .padding(horizontal = 24.dp)
         ) {
             LayerChooser(
@@ -47,34 +52,79 @@ internal fun PlayerController(
                 accept(MainIntent.PlayerController.LayersModal(open = true))
             }
         }
+        if (state is PlayerControllerState.Sampling) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(15))
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable { accept(MainIntent.PlayerController.OnPlayButton) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(36.dp),
+                    painter = painterResource(id = state.playingIcon),
+                    contentDescription = state.contentDescription,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                )
+            }
+        }
+
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(15))
-                .background(MaterialTheme.colorScheme.primary)
-                .clickable { accept(MainIntent.PlayerController.OnPlayButton) },
+                .weight(1F),
             contentAlignment = Alignment.Center,
         ) {
-            Image(
-                modifier = Modifier
-                    .size(36.dp),
-                painter = painterResource(id = state.playingIcon),
-                contentDescription = state.contentDescription,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+            Record(
+                state = state,
+                accept = accept
             )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1F, true)
-                .clip(RoundedCornerShape(15))
-        ) {
-
         }
     }
 }
 
 @Composable
-internal fun LayerChooser(
+private fun Record(
+    modifier: Modifier = Modifier,
+    state: PlayerControllerState,
+    accept: (MainIntent.PlayerController) -> Unit
+) {
+    val size by animateDpAsState(
+        targetValue = when {
+            state.isRecording -> 64.dp
+            else -> 48.dp
+        }
+    )
+    val iconSize by animateDpAsState(
+        targetValue = when {
+            state.isRecording -> 48.dp
+            else -> 36.dp
+        }
+    )
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(15))
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable { accept(MainIntent.PlayerController.OnRecord) },
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            modifier = Modifier
+                .size(iconSize)
+                .align(Alignment.Center),
+            painter = painterResource(id = R.drawable.ic_microphone),
+            contentDescription = "Recording",
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+        )
+    }
+
+}
+
+@Composable
+private fun LayerChooser(
     modifier: Modifier,
     name: String,
     onClick: () -> Unit
@@ -96,13 +146,11 @@ internal fun LayerChooser(
 
 @Composable
 @Preview
-private fun PlayerControllerPreview() {
+private fun PlayerControllerPreview(
+    @PreviewParameter(PlayerControllerStateProvider::class) state: PlayerControllerState
+) {
     PlayerController(
-        state = PlayerControllerState(
-            playingIcon = R.drawable.ic_play,
-            contentDescription = "",
-            layerName = "Слой 1"
-        )
+        state = state
     ) {
 
     }
