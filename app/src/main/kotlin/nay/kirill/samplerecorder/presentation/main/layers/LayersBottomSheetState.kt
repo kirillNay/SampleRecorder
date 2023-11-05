@@ -20,18 +20,18 @@ internal class LayersBottomSheetStateProvider : PreviewParameterProvider<LayersB
         LayersBottomSheetState(
             opened = true,
             layers = listOf(
-                LayerUi(1, "Слой 1", false),
-                LayerUi(2, "Слой 1", false),
-                LayerUi(3, "Слой 1", false)
+                LayerUi(1, "Слой 1", false, false),
+                LayerUi(2, "Слой 1", false, false),
+                LayerUi(3, "Слой 1", false, false)
             ),
             editAvailable = false
         ),
         LayersBottomSheetState(
             opened = true,
             layers = listOf(
-                LayerUi(1, "Слой 1", false),
-                LayerUi(2, "Слой 1", false),
-                LayerUi(3, "Слой 1", false)
+                LayerUi(1, "Слой 1", false, false),
+                LayerUi(2, "Слой 1", false, false),
+                LayerUi(3, "Слой 1", false, false)
             ),
             editAvailable = true
         )

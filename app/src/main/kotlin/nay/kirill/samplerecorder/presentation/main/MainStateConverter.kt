@@ -62,7 +62,8 @@ class MainStateConverter(
                     maxSpeedText = "$MAX_SPEED_VALUE",
                     maxVolumeText = "$MAX_VOLUME_VALUE"
                 ),
-                layersBottomSheetState = state.layersBottomSheetState()
+                layersBottomSheetState = state.layersBottomSheetState(),
+                isVocal = state.currentLayer?.sample?.type == SampleType.VOICE
             )
         }
     }
@@ -73,11 +74,12 @@ class MainStateConverter(
         editAvailable = !isRecording
     )
 
-    private fun List<Layer>.toUI(selectedId: Int): List<LayerUi> = map {
+    private fun List<Layer>.toUI(selectedId: Int): List<LayerUi> = map { layer ->
         LayerUi(
-            id = it.id,
-            name = resourceManager.getString(R.string.layer_name, it.id),
-            isSelected = it.id == selectedId
+            id = layer.id,
+            name = resourceManager.getString(R.string.layer_name, layer.id),
+            isSelected = layer.id == selectedId,
+            isPlaying = layer.isPlaying.takeIf { layer.sample != null }
         )
     }
 
@@ -88,7 +90,7 @@ class MainStateConverter(
     )
 
     private fun List<Sample>.convertToGroups(selectedSampleId: Int?, expandedType: SampleType?): List<SampleGroupUi> {
-        return groupBy { it.type }.map { (type, samples) ->
+        return groupBy { it.type }.mapNotNull { (type, samples) ->
             when (type) {
                 SampleType.GUITAR -> SampleGroupUi(
                     type = SampleType.GUITAR,
@@ -122,6 +124,8 @@ class MainStateConverter(
                     isExpanded = expandedType == type,
                     isShort = expandedType != null && expandedType != type
                 )
+
+                else -> null
             }
         }
     }

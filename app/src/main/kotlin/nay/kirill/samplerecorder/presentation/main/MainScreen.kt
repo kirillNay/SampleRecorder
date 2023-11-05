@@ -80,10 +80,12 @@ private fun Content(
                 }
                 is MainUIState.Sampling -> {
                     Sampling(state, accept)
-                    SampleChooser(
-                        state = state.chooserState,
-                        accept = accept
-                    )
+                    if (!state.isVocal) {
+                        SampleChooser(
+                            state = state.chooserState,
+                            accept = accept
+                        )
+                    }
                 }
                 is MainUIState.Recording -> {
                     Recording(state, accept)
@@ -165,12 +167,38 @@ private fun Sampling(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.height(170.dp))
-        AudioController(
-            modifier = Modifier.weight(1F),
-            state = state.audioControllerState,
-            accept = accept
-        )
+        if(state.isVocal) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(250.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.ic_microphone),
+                    contentDescription = "Audio wave",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier.size(96.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(id = R.string.vocal_sample),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                )
+                Spacer(Modifier.weight(1F))
+                PlayerController(
+                    state = state.playerControllerState,
+                    accept = accept
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.height(170.dp))
+            AudioController(
+                modifier = Modifier.weight(1F),
+                state = state.audioControllerState,
+                accept = accept
+            )
+        }
         Spacer(modifier = Modifier.height(18.dp))
         PlayerTimeline(
             state = state.timeline,

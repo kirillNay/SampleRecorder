@@ -142,6 +142,34 @@ private fun Layer(
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.outlineVariant)
             )
         }
+
+        if (layer.isPlaying != null) {
+            Box(
+                modifier = Modifier
+                    .padding(end = 64.dp)
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(15))
+                    .align(Alignment.CenterEnd)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable { accept(MainIntent.Layers.SetPlaying(layer.id, !layer.isPlaying)) },
+                contentAlignment = Alignment.Center,
+            ) {
+                val playingIcon = remember(layer.isPlaying) {
+                    when {
+                        layer.isPlaying -> R.drawable.ic_pause
+                        else -> R.drawable.ic_play
+                    }
+                }
+
+                Image(
+                    modifier = Modifier
+                        .size(36.dp),
+                    painter = painterResource(id = playingIcon),
+                    contentDescription = "Set playing layer",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                )
+            }
+        }
     }
 }
 

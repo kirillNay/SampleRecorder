@@ -9,6 +9,7 @@
     <string name="speed">Скорость</string>
 
     <string name="no_sample_message">Выберите семпл, чтобы продолжить</string>
+    <string name="vocal_sample">Запись вокала</string>
     <string name="layer_name">Слой #%d</string>
 
     <string name="create_new_layer">Создать новый</string>

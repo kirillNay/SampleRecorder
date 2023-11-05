@@ -30,7 +30,7 @@ public:
 
     void loadFromSampleWab(unsigned char *buff, int length, int id);
 
-    void loadFromRecorded(RecordedSample sample, int id);
+    void loadFromRecorded(const RecordedSample& sample, int id);
 
     void startStream();
 

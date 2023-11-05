@@ -65,7 +65,8 @@ sealed interface MainUIState {
         override val layersBottomSheetState: LayersBottomSheetState,
         val chooserState: SampleChooserUIState,
         val timeline: PlayerTimelineState,
-        val audioControllerState: AudioControllerState
+        val audioControllerState: AudioControllerState,
+        val isVocal: Boolean
     ) : MainUIState
 
 }
@@ -73,7 +74,8 @@ sealed interface MainUIState {
 data class LayerUi(
     val id: Int,
     val name: String,
-    val isSelected: Boolean
+    val isSelected: Boolean,
+    val isPlaying: Boolean?
 )
 
 // Previews

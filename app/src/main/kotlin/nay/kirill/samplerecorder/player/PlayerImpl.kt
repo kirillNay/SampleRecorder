@@ -105,12 +105,11 @@ class PlayerImpl(
     override fun getDuration(sampleId: Int): Int = getDurationNative(sampleId)
 
     override fun startRecording() {
-        startRecordingNative()
+        startVoiceRecordingNative()
     }
 
     override fun stopRecording(sampleId: Int) {
-        stopRecordingNative()
-        //playNative(10)
+        stopVoiceRecordingNative(sampleId)
     }
 
     private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {

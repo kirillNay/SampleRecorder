@@ -78,7 +78,7 @@ void SamplePlayer::loadFromSampleWab(unsigned char *buff, int length, int id) {
     samplesMap[id] = sample;
 }
 
-void SamplePlayer::loadFromRecorded(RecordedSample sample, int id) {
+void SamplePlayer::loadFromRecorded(const RecordedSample& sample, int id) {
     SampleBuffer *sampleBuffer = new SampleBuffer();
     sampleBuffer->loadSampleData(sample.data, sample.channelCount, sample.sampleRate);
 

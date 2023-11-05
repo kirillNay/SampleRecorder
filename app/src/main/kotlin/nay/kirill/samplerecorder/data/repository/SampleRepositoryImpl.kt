@@ -6,7 +6,7 @@ import nay.kirill.samplerecorder.domain.model.SampleType
 
 internal class SampleRepositoryImpl : SampleRepository {
 
-    override fun getSamples(): List<Sample> = listOf(
+    private val samples = mutableListOf(
         Sample(
             name = "Clap",
             assetName = "clap.wav",
@@ -33,5 +33,9 @@ internal class SampleRepositoryImpl : SampleRepository {
             type = SampleType.DRUM
         )
     )
+
+    override fun getLocalSamples(): List<Sample> = samples
+
+    override fun createVocalSample(): Sample = Sample("Voice", "", SampleType.VOICE).apply { samples.add(this) }
 
 }

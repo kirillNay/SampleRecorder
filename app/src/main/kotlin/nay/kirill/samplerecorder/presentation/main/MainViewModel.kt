@@ -11,6 +11,7 @@ import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
 import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
+import nay.kirill.samplerecorder.domain.usecase.CreateVoiceSample
 import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.RemoveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
@@ -23,6 +24,7 @@ class MainViewModel(
     private val createLayerUseCase: CreateLayerUseCase,
     private val removeLayerUseCase: RemoveLayerUseCase,
     private val setPlayingLayerUseCase: SetPlayingLayerUseCase,
+    private val createVoiceSample: CreateVoiceSample,
     observeLayersUseCase: ObserveLayersUseCase,
     getSamplesUseCase: GetSamplesUseCase
 ) : ViewModel() {
@@ -68,14 +70,34 @@ class MainViewModel(
             is MainIntent.Layers.SelectLayer -> reduceSelectLayer(intent)
             is MainIntent.Layers.CreateNew -> reduceNewLayer()
             is MainIntent.Layers.RemoveLayer -> reduceRemoveLayer(intent)
+            is MainIntent.Layers.SetPlaying -> reduceSetLayerPlaying(intent)
+        }
+    }
+
+    private fun reduceSetLayerPlaying(intent: MainIntent.Layers.SetPlaying) {
+        setPlayingLayerUseCase(intent.id, intent.isPlaying)
+
+        val selectedSampleId = state.layers.find { it.id == intent.id }?.sample?.id ?: return
+        if (intent.isPlaying) {
+            player.resume(selectedSampleId)
+        } else {
+            player.pause(selectedSampleId)
         }
     }
 
     private fun reduceOnLayer() {
         when {
             state.isRecording -> {
-                state = state.copy(isRecording = false)
-                player.stopRecording(10)
+                val sample = createVoiceSample()
+                val layer = state.currentLayer?.copy(sample = sample)
+
+                state = state.copy(
+                    isRecording = false,
+                )
+                layer?.let { saveLayerUseCase(it) }
+                player.stopRecording(sample.id)
+                player.playLoop(sample.id)
+                player.pause(sample.id)
             }
             else -> {
                 state = state.copy(isRecording = true)

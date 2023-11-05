@@ -1,6 +1,7 @@
 package nay.kirill.samplerecorder.presentation.di
 
 import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
+import nay.kirill.samplerecorder.domain.usecase.CreateVoiceSample
 import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
@@ -22,4 +23,5 @@ internal val mainModule = module {
     factoryOf(::CreateLayerUseCase)
     factoryOf(::ObserveLayersUseCase)
     factoryOf(::SetPlayingLayerUseCase)
+    factoryOf(::CreateVoiceSample)
 }

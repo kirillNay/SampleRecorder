@@ -34,6 +34,8 @@ sealed interface MainIntent {
 
         data class RemoveLayer(val id: Int) : Layers
 
+        data class SetPlaying(val id: Int, val isPlaying: Boolean) : Layers
+
     }
 
     sealed interface AudioParams : MainIntent {
