@@ -1,16 +1,20 @@
 package nay.kirill.samplerecorder.presentation.main.playerController
 
+import android.widget.Space
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -71,12 +75,17 @@ internal fun PlayerController(
             }
         }
 
-        Box(
+        Row(
             modifier = Modifier
                 .weight(1F),
-            contentAlignment = Alignment.Center,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Record(
+            RecordVoice(
+                state = state,
+                accept = accept
+            )
+            Spacer(Modifier.width(12.dp))
+            RecordFinal(
                 state = state,
                 accept = accept
             )
@@ -85,7 +94,7 @@ internal fun PlayerController(
 }
 
 @Composable
-private fun Record(
+private fun RecordVoice(
     modifier: Modifier = Modifier,
     state: PlayerControllerState,
     accept: (MainIntent.PlayerController) -> Unit
@@ -116,6 +125,45 @@ private fun Record(
                 .size(iconSize)
                 .align(Alignment.Center),
             painter = painterResource(id = R.drawable.ic_microphone),
+            contentDescription = "Recording",
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+        )
+    }
+
+}
+
+@Composable
+private fun RecordFinal(
+    modifier: Modifier = Modifier,
+    state: PlayerControllerState,
+    accept: (MainIntent.PlayerController) -> Unit
+) {
+    val size by animateDpAsState(
+        targetValue = when {
+            state.isFinalRecording -> 64.dp
+            else -> 48.dp
+        }
+    )
+    val iconSize by animateDpAsState(
+        targetValue = when {
+            state.isFinalRecording -> 48.dp
+            else -> 36.dp
+        }
+    )
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(15))
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable { accept(MainIntent.PlayerController.OnFinalRecord) },
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            modifier = Modifier
+                .size(iconSize)
+                .align(Alignment.Center),
+            painter = painterResource(id = R.drawable.ic_record),
             contentDescription = "Recording",
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
         )

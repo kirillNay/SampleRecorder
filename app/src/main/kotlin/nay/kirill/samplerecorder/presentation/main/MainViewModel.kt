@@ -66,11 +66,12 @@ class MainViewModel(
             is MainIntent.AudioParams.NewParams -> reduceNewAudioParams(intent)
             is MainIntent.PlayerController.Seek -> reduceSeekPlayer(intent)
             is MainIntent.PlayerController.LayersModal -> reduceOpenLayerModal(intent)
-            is MainIntent.PlayerController.OnRecord -> reduceOnLayer()
+            is MainIntent.PlayerController.OnRecord -> reduceOnRecord()
             is MainIntent.Layers.SelectLayer -> reduceSelectLayer(intent)
             is MainIntent.Layers.CreateNew -> reduceNewLayer()
             is MainIntent.Layers.RemoveLayer -> reduceRemoveLayer(intent)
             is MainIntent.Layers.SetPlaying -> reduceSetLayerPlaying(intent)
+            is MainIntent.PlayerController.OnFinalRecord -> reduceOnFinalRecord()
         }
     }
 
@@ -85,7 +86,24 @@ class MainViewModel(
         }
     }
 
-    private fun reduceOnLayer() {
+    private fun reduceOnFinalRecord() {
+        when {
+            state.isFinalRecording -> {
+                state = state.copy(
+                    isFinalRecording = false
+                )
+                player.startRecording()
+            }
+            else -> {
+                state = state.copy(
+                    isFinalRecording = true
+                )
+                player.stopRecording()
+            }
+        }
+    }
+
+    private fun reduceOnRecord() {
         when {
             state.isRecording -> {
                 val sample = createVoiceSample()
@@ -95,13 +113,13 @@ class MainViewModel(
                     isRecording = false,
                 )
                 layer?.let { saveLayerUseCase(it) }
-                player.stopRecording(sample.id)
+                player.stopVoiceRecording(sample.id)
                 player.playLoop(sample.id)
                 player.pause(sample.id)
             }
             else -> {
                 state = state.copy(isRecording = true)
-                player.startRecording()
+                player.startVoiceRecording()
             }
         }
 

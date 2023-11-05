@@ -24,6 +24,8 @@ sealed interface MainIntent {
 
         object OnRecord : PlayerController
 
+        object OnFinalRecord : PlayerController
+
     }
 
     sealed interface Layers : MainIntent {

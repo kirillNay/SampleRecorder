@@ -87,6 +87,9 @@ private fun Content(
                         )
                     }
                 }
+                is MainUIState.FinalRecording -> {
+                    FinalRecording(state, accept)
+                }
                 is MainUIState.Recording -> {
                     Recording(state, accept)
                 }
@@ -117,6 +120,38 @@ private fun Recording(
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(id = R.string.record_on_process),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+        Spacer(Modifier.weight(1F))
+        PlayerController(
+            state = state.playerControllerState,
+            accept = accept
+        )
+    }
+}
+
+@Composable
+private fun FinalRecording(
+    state: MainUIState.FinalRecording,
+    accept: (MainIntent) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(250.dp))
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.final_recording))
+        val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+
+        LottieAnimation(
+            modifier = Modifier.size(96.dp),
+            composition = composition,
+            progress = { progress },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(id = R.string.final_record_on_process),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.surfaceVariant
         )

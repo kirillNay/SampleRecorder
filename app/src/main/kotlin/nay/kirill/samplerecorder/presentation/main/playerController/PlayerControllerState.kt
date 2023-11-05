@@ -10,16 +10,20 @@ sealed interface PlayerControllerState {
 
     val isRecording: Boolean
 
+    val isFinalRecording: Boolean
+
     data class Sampling(
         override val layerName: String,
         @DrawableRes val playingIcon: Int,
         val contentDescription: String,
-        override val isRecording: Boolean
+        override val isRecording: Boolean,
+        override val isFinalRecording: Boolean
     ) : PlayerControllerState
 
     data class EmptySample(
         override val layerName: String,
-        override val isRecording: Boolean
+        override val isRecording: Boolean,
+        override val isFinalRecording: Boolean
     ) : PlayerControllerState
 
 }
@@ -31,15 +35,18 @@ internal class PlayerControllerStateProvider : PreviewParameterProvider<PlayerCo
             layerName = "Слой 1",
             playingIcon = R.drawable.ic_play,
             contentDescription = "Play",
-            isRecording = false
+            isRecording = false,
+            false
         ),
         PlayerControllerState.EmptySample(
             layerName = "Слой 1",
-            isRecording = false
+            isRecording = false,
+            false
         ),
         PlayerControllerState.EmptySample(
             layerName = "Слой 1",
-            isRecording = true
+            isRecording = true,
+            false
         )
     )
 

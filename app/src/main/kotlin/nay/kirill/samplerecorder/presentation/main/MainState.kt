@@ -32,7 +32,8 @@ data class MainState(
     val initialVolumeScale: Float = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE),
     val duration: Int = 0,
     val isLayersOpen: Boolean = false,
-    val isRecording: Boolean = false
+    val isRecording: Boolean = false,
+    val isFinalRecording: Boolean = false
 ) {
 
     val currentLayer: Layer? get() = layers.find { it.id == currentLayerId }
@@ -50,6 +51,11 @@ sealed interface MainUIState {
     val layersBottomSheetState: LayersBottomSheetState
 
     data class Recording(
+        override val playerControllerState: PlayerControllerState.EmptySample,
+        override val layersBottomSheetState: LayersBottomSheetState
+    ) : MainUIState
+
+    data class FinalRecording(
         override val playerControllerState: PlayerControllerState.EmptySample,
         override val layersBottomSheetState: LayersBottomSheetState
     ) : MainUIState
@@ -147,31 +153,6 @@ internal class MainUIStateProvider : PreviewParameterProvider<MainUIState> {
         )
     )
 
-    override val values: Sequence<MainUIState> = sequenceOf(
-        MainUIState.Empty(
-            chooserState = SampleChooserUIState(sampleGroups = sampleGroups),
-            playerControllerState = PlayerControllerState.EmptySample(
-                layerName = "Слой 1",
-                isRecording = false
-            ),
-            layersBottomSheetState = LayersBottomSheetState(
-                opened = false,
-                layers = emptyList(),
-                editAvailable = false
-            )
-        ),
-        MainUIState.Empty(
-            chooserState = SampleChooserUIState(sampleGroups = sampleGroups1),
-            playerControllerState = PlayerControllerState.EmptySample(
-                layerName = "Слой 1",
-                isRecording = true
-            ),
-            layersBottomSheetState = LayersBottomSheetState(
-                opened = false,
-                layers = emptyList(),
-                editAvailable = false
-            )
-        ),
-    )
+    override val values: Sequence<MainUIState> = sequenceOf()
 
 }

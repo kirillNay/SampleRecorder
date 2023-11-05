@@ -22,7 +22,16 @@ class MainStateConverter(
             state.isRecording -> MainUIState.Recording(
                 playerControllerState = PlayerControllerState.EmptySample(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
-                    isRecording = true
+                    isRecording = true,
+                    isFinalRecording = false
+                ),
+                layersBottomSheetState = state.layersBottomSheetState()
+            )
+            state.isFinalRecording -> MainUIState.FinalRecording(
+                playerControllerState = PlayerControllerState.EmptySample(
+                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
+                    isRecording = false,
+                    isFinalRecording = true
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
@@ -30,7 +39,8 @@ class MainStateConverter(
                 chooserState = state.chooserState(),
                 playerControllerState = PlayerControllerState.EmptySample(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
-                    isRecording = false
+                    isRecording = false,
+                    isFinalRecording = false
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
@@ -41,7 +51,8 @@ class MainStateConverter(
                     playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
                     contentDescription = if (state.isPlaying) "Stop" else "Play",
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
-                    isRecording = false
+                    isRecording = false,
+                    isFinalRecording = false
                 ),
                 timeline = state.amplitude?.let {
                     PlayerTimelineState.Data(

@@ -29,7 +29,11 @@ interface Player {
 
     fun getDuration(sampleId: Int) : Int
 
+    fun startVoiceRecording()
+
+    fun stopVoiceRecording(sampleId: Int)
+
     fun startRecording()
 
-    fun stopRecording(sampleId: Int)
+    fun stopRecording()
 }
