@@ -12,42 +12,28 @@ sealed interface PlayerControllerState {
 
     val isFinalRecording: Boolean
 
+    val isRecordAvailable: Boolean
+
     data class Sampling(
         override val layerName: String,
         @DrawableRes val playingIcon: Int,
         val contentDescription: String,
         override val isRecording: Boolean,
-        override val isFinalRecording: Boolean
+        override val isFinalRecording: Boolean,
+        override val isRecordAvailable: Boolean
     ) : PlayerControllerState
 
     data class EmptySample(
         override val layerName: String,
         override val isRecording: Boolean,
-        override val isFinalRecording: Boolean
+        override val isFinalRecording: Boolean,
+        override val isRecordAvailable: Boolean
     ) : PlayerControllerState
 
 }
 
 internal class PlayerControllerStateProvider : PreviewParameterProvider<PlayerControllerState> {
 
-    override val values: Sequence<PlayerControllerState> = sequenceOf(
-        PlayerControllerState.Sampling(
-            layerName = "Слой 1",
-            playingIcon = R.drawable.ic_play,
-            contentDescription = "Play",
-            isRecording = false,
-            false
-        ),
-        PlayerControllerState.EmptySample(
-            layerName = "Слой 1",
-            isRecording = false,
-            false
-        ),
-        PlayerControllerState.EmptySample(
-            layerName = "Слой 1",
-            isRecording = true,
-            false
-        )
-    )
+    override val values: Sequence<PlayerControllerState> = sequenceOf()
 
 }

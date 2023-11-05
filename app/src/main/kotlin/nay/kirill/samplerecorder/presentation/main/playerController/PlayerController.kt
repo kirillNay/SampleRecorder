@@ -1,6 +1,5 @@
 package nay.kirill.samplerecorder.presentation.main.playerController
 
-import android.widget.Space
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -112,24 +111,25 @@ private fun RecordVoice(
         }
     )
 
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(RoundedCornerShape(15))
-            .background(MaterialTheme.colorScheme.primary)
-            .clickable { accept(MainIntent.PlayerController.OnRecord) },
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            modifier = Modifier
-                .size(iconSize)
-                .align(Alignment.Center),
-            painter = painterResource(id = R.drawable.ic_microphone),
-            contentDescription = "Recording",
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
-        )
+    if (state.isRecordAvailable) {
+        Box(
+            modifier = modifier
+                .size(size)
+                .clip(RoundedCornerShape(15))
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable { accept(MainIntent.PlayerController.OnRecord) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                modifier = Modifier
+                    .size(iconSize)
+                    .align(Alignment.Center),
+                painter = painterResource(id = R.drawable.ic_microphone),
+                contentDescription = "Recording",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+            )
+        }
     }
-
 }
 
 @Composable

@@ -1,5 +1,8 @@
 package nay.kirill.samplerecorder.presentation.main
 
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.ResourceManager
 import nay.kirill.samplerecorder.domain.model.Layer
@@ -14,7 +17,8 @@ import nay.kirill.samplerecorder.presentation.main.sampleChooser.SampleGroupUi
 import nay.kirill.samplerecorder.presentation.main.sampleChooser.SampleUi
 
 class MainStateConverter(
-    private val resourceManager: ResourceManager
+    private val resourceManager: ResourceManager,
+    private val context: Context
 ) : (MainState) -> MainUIState {
 
     override fun invoke(state: MainState): MainUIState {
@@ -23,7 +27,8 @@ class MainStateConverter(
                 playerControllerState = PlayerControllerState.EmptySample(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = true,
-                    isFinalRecording = false
+                    isFinalRecording = false,
+                    isRecordAvailable = isRecordPermissionGranted
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
@@ -31,7 +36,8 @@ class MainStateConverter(
                 playerControllerState = PlayerControllerState.EmptySample(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = false,
-                    isFinalRecording = true
+                    isFinalRecording = true,
+                    isRecordAvailable = isRecordPermissionGranted
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
@@ -40,7 +46,8 @@ class MainStateConverter(
                 playerControllerState = PlayerControllerState.EmptySample(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = false,
-                    isFinalRecording = false
+                    isFinalRecording = false,
+                    isRecordAvailable = isRecordPermissionGranted
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
@@ -52,7 +59,8 @@ class MainStateConverter(
                     contentDescription = if (state.isPlaying) "Stop" else "Play",
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = false,
-                    isFinalRecording = false
+                    isFinalRecording = false,
+                    isRecordAvailable = isRecordPermissionGranted
                 ),
                 timeline = state.amplitude?.let {
                     PlayerTimelineState.Data(
@@ -78,6 +86,8 @@ class MainStateConverter(
             )
         }
     }
+
+    private val isRecordPermissionGranted: Boolean get() = ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
     private fun MainState.layersBottomSheetState() = LayersBottomSheetState(
         opened = isLayersOpen,
