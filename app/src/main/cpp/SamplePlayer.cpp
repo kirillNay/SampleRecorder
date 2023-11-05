@@ -239,8 +239,8 @@ void SamplePlayer::stopRecording() {
     isRecording = false;
 
     ofstream audioFile;
-    remove("/storage/emulated/0/Music/SampleRecorder/record.wav");
-    audioFile.open("/storage/emulated/0/Music/SampleRecorder/record3.wav");
+    remove("/storage/emulated/0/Music/SampleRecorder/final.wav");
+    audioFile.open("/storage/emulated/0/Music/SampleRecorder/final.wav");
 
     //Header chunk
     audioFile << "RIFF";

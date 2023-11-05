@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -39,7 +40,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun MainScreen(
-    viewModel: MainViewModel = koinViewModel()
+    viewModel: MainViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -153,7 +154,8 @@ private fun FinalRecording(
         Text(
             text = stringResource(id = R.string.final_record_on_process),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.surfaceVariant
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            textAlign = TextAlign.Center
         )
         Spacer(Modifier.weight(1F))
         PlayerController(

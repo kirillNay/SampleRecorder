@@ -1,8 +1,12 @@
 package nay.kirill.samplerecorder.presentation.main
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -16,6 +20,7 @@ import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.RemoveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SetPlayingLayerUseCase
+import java.io.File
 
 class MainViewModel(
     private val stateConverter: MainStateConverter,
@@ -26,8 +31,11 @@ class MainViewModel(
     private val setPlayingLayerUseCase: SetPlayingLayerUseCase,
     private val createVoiceSample: CreateVoiceSample,
     observeLayersUseCase: ObserveLayersUseCase,
-    getSamplesUseCase: GetSamplesUseCase
+    getSamplesUseCase: GetSamplesUseCase,
+    private val context: Context
 ) : ViewModel() {
+
+    val startIntent: MutableSharedFlow<Intent> = MutableSharedFlow()
 
     private val layersFlow = observeLayersUseCase()
 
@@ -92,13 +100,20 @@ class MainViewModel(
                 state = state.copy(
                     isFinalRecording = false
                 )
-                player.startRecording()
+                player.stopRecording()
+
+                val sharedIntent = Intent().apply {
+                    action = Intent.ACTION_SEND_MULTIPLE
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, arrayListOf(Uri.fromFile(File("/storage/emulated/0/Music/SampleRecorder/final.wav"))))
+                    type = "audio/*"
+                }
+                startIntent.tryEmit(sharedIntent)
             }
             else -> {
                 state = state.copy(
                     isFinalRecording = true
                 )
-                player.stopRecording()
+                player.startRecording()
             }
         }
     }

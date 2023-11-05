@@ -52,6 +52,31 @@ internal class SampleRepositoryImpl : SampleRepository {
             assetName = "Warm.wav",
             type = SampleType.GUITAR
         ),
+        Sample(
+            name = "Airy Whistle",
+            assetName = "Airy Whistle.wav",
+            type = SampleType.HORN
+        ),
+        Sample(
+            name = "Delightful Echoes",
+            assetName = "Delightful Echoes.wav",
+            type = SampleType.HORN
+        ),
+        Sample(
+            name = "Flute Ecstasy",
+            assetName = "Flute Ecstasy.wav",
+            type = SampleType.HORN
+        ),
+        Sample(
+            name = "Freshening Riff",
+            assetName = "Freshening Riff.wav",
+            type = SampleType.HORN
+        ),
+        Sample(
+            name = "Naruto Flute",
+            assetName = "Naruto Flute",
+            type = SampleType.HORN
+        ),
     )
 
     override fun getLocalSamples(): List<Sample> = samples

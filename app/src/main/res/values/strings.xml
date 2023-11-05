@@ -15,5 +15,5 @@
     <string name="create_new_layer">Создать новый</string>
 
     <string name="record_on_process">Происходит запись с микрофона</string>
-    <string name="final_record_on_process">Происходит запись аудио</string>
+    <string name="final_record_on_process">Происходит запись аудио\n\nФайл будет доступен по пути "Music/SampleRecorder/final.wav"</string>
 </resources>
