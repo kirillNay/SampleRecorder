@@ -58,6 +58,10 @@ public:
 
     void setVolume(int id, float scale);
 
+    void setRecording();
+
+    void stopRecording();
+
 
 private:
     std::map<int, Sample*> samplesMap;
@@ -93,8 +97,10 @@ private:
     // Oboe Audio Stream
     std::shared_ptr<oboe::AudioStream> audioStream;
 
-    int32_t channelCount;
     int32_t sampleRate;
+
+    bool isRecording;
+    std::vector<float_t> finalRecord;
 
 };
 

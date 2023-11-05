@@ -102,17 +102,27 @@ Java_nay_kirill_samplerecorder_player_PlayerImpl_setVolumeNative(JNIEnv *env, jo
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_nay_kirill_samplerecorder_player_PlayerImpl_startRecordingNative(JNIEnv *env, jobject thiz) {
-    player.stopStream();
+Java_nay_kirill_samplerecorder_player_PlayerImpl_startVoiceRecordingNative(JNIEnv *env, jobject thiz) {
     recorder.initStream();
     recorder.startRecord();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_nay_kirill_samplerecorder_player_PlayerImpl_stopRecordingNative(JNIEnv *env, jobject thiz, jint id) {
+Java_nay_kirill_samplerecorder_player_PlayerImpl_stopVoiceRecordingNative(JNIEnv *env, jobject thiz, jint id) {
     recorder.stopRecord();
     auto result = recorder.getRecord();
     player.loadFromRecorded(result, id);
-    player.startStream();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_startRecordingNative(JNIEnv *env, jobject thiz) {
+    player.setRecording();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_stopRecordingNative(JNIEnv *env, jobject thiz) {
+    player.stopRecording();
 }

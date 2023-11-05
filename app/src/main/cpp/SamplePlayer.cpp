@@ -9,13 +9,26 @@
 
 #include <oboe/oboe.h>
 #include <android/log.h>
+#include <fstream>
+#include <iostream>
 
 using namespace oboe;
 using namespace parselib;
 using namespace iolib;
+using namespace std;
 
-static const char* TAG = "SamplePlayer";
+static const char *TAG = "SamplePlayer";
 static const int CHANNEL_COUNT = 2;
+
+namespace little_endian_io {
+    template<typename Word>
+    std::ostream &write_word(std::ostream &outs, Word value, unsigned size = sizeof(Word)) {
+        for (; size; --size, value >>= 8)
+            outs.put(static_cast <char> (value & 0xFF));
+        return outs;
+    }
+}
+using namespace little_endian_io;
 
 bool SamplePlayer::initStream() {
 
@@ -47,8 +60,6 @@ bool SamplePlayer::initStream() {
 }
 
 void SamplePlayer::loadFromSampleWab(unsigned char *buff, int length, int id) {
-    __android_log_print(ANDROID_LOG_ERROR, TAG, "Start loading sample with id %d", id);
-
     MemInputStream stream(buff, length);
 
     WavStreamReader reader(&stream);
@@ -56,10 +67,10 @@ void SamplePlayer::loadFromSampleWab(unsigned char *buff, int length, int id) {
 
     reader.getNumChannels();
 
-    SampleBuffer* sampleBuffer = new SampleBuffer();
+    SampleBuffer *sampleBuffer = new SampleBuffer();
     sampleBuffer->loadSampleData(&reader);
 
-    OneShotSampleSource* source = new OneShotSampleSource(sampleBuffer, 1.0);
+    OneShotSampleSource *source = new OneShotSampleSource(sampleBuffer, 1.0);
 
     sampleBuffer->resampleData(sampleRate);
     auto sample = new Sample(sampleBuffer, source, id);
@@ -68,10 +79,10 @@ void SamplePlayer::loadFromSampleWab(unsigned char *buff, int length, int id) {
 }
 
 void SamplePlayer::loadFromRecorded(RecordedSample sample, int id) {
-    SampleBuffer* sampleBuffer = new SampleBuffer();
+    SampleBuffer *sampleBuffer = new SampleBuffer();
     sampleBuffer->loadSampleData(sample.data, sample.channelCount, sample.sampleRate);
 
-    OneShotSampleSource* source = new OneShotSampleSource(sampleBuffer, 1);
+    OneShotSampleSource *source = new OneShotSampleSource(sampleBuffer, 1);
     source->setGain(1);
 
     sampleBuffer->resampleData(sampleRate);
@@ -89,7 +100,7 @@ void SamplePlayer::startStream() {
         }
         if (wasOpenSuccessful) {
             Result result = audioStream->requestStart();
-            if (result != Result::OK){
+            if (result != Result::OK) {
                 __android_log_print(
                         ANDROID_LOG_ERROR,
                         TAG,
@@ -123,9 +134,16 @@ DataCallbackResult SamplePlayer::DataCallback::onAudioReady(
 
     memset(audioData, 0, static_cast<size_t>(numFrames) * CHANNEL_COUNT * sizeof(float));
 
-    for (auto const& [key, val] : parent->samplesMap) {
+    for (auto const &[key, val]: parent->samplesMap) {
         if (val->source->isPlaying()) {
-            val->source->mixAudio((float*)audioData, CHANNEL_COUNT, numFrames);
+            val->source->mixAudio((float *) audioData, CHANNEL_COUNT, numFrames);
+        }
+    }
+
+    if (parent->isRecording) {
+        auto data = static_cast<float *>(audioData);
+        for (int index = 0; index < numFrames; index++) {
+            parent->finalRecord.push_back(data[index]);
         }
     }
 
@@ -207,3 +225,57 @@ void SamplePlayer::setVolume(int id, float scale) {
         samplesMap[id]->source->setGain(scale);
     }
 }
+
+void SamplePlayer::setRecording() {
+    isRecording = true;
+    finalRecord.clear();
+}
+
+void writeToFile(ofstream &file, int value, int size) {
+    file.write(reinterpret_cast<const char*> (&value), size);
+}
+
+void SamplePlayer::stopRecording() {
+    isRecording = false;
+
+    ofstream audioFile;
+    remove("/storage/emulated/0/Music/SampleRecorder/record.wav");
+    audioFile.open("/storage/emulated/0/Music/SampleRecorder/record3.wav");
+
+    //Header chunk
+    audioFile << "RIFF";
+    audioFile << "----";
+    audioFile << "WAVE";
+
+    // Format chunk
+    audioFile << "fmt ";
+    writeToFile(audioFile, 16, 4); // Size
+    writeToFile(audioFile, 1, 2); // Compression code
+    writeToFile(audioFile, CHANNEL_COUNT, 2); // Number of channels
+    writeToFile(audioFile, sampleRate, 4); // Sample rate
+    writeToFile(audioFile, sampleRate * CHANNEL_COUNT * audioStream->getBytesPerSample() / 8, 4 ); // Byte rate
+    writeToFile(audioFile, CHANNEL_COUNT * audioStream->getBytesPerSample() / 8, 2); // Block align
+    writeToFile(audioFile, CHANNEL_COUNT * audioStream->getBytesPerSample(), 2); // Bit depth
+
+    //Data chunk
+    audioFile << "data";
+    audioFile << "----";
+
+    int preAudioPosition = audioFile.tellp();
+
+    auto maxAmplitude = pow(2, 16 - 1) - 1;
+    for(int i = 0; i < finalRecord.size(); i++ ) {
+        int intSample = static_cast<int> (finalRecord[i]);
+        writeToFile(audioFile, intSample, 2);
+    }
+    int postAudioPosition = audioFile.tellp();
+
+    audioFile.seekp(preAudioPosition - 4);
+    writeToFile(audioFile, postAudioPosition - preAudioPosition, 4);
+
+    audioFile.seekp(4, ios::beg);
+    writeToFile(audioFile, postAudioPosition - 8, 4);
+
+    audioFile.close();
+}
+
