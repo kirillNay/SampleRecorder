@@ -104,7 +104,7 @@ class MainViewModel(
 
                 val sharedIntent = Intent().apply {
                     action = Intent.ACTION_SEND_MULTIPLE
-                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, arrayListOf(Uri.fromFile(File("/storage/emulated/0/Music/SampleRecorder/final.wav"))))
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, arrayListOf(Uri.fromFile(File("/storage/emulated/0/Music/final.wav"))))
                     type = "audio/*"
                 }
                 startIntent.tryEmit(sharedIntent)

@@ -111,7 +111,7 @@ private fun RecordVoice(
         }
     )
 
-    if (state.isRecordAvailable) {
+    if (state.isRecordAvailable && !state.isFinalRecording) {
         Box(
             modifier = modifier
                 .size(size)
@@ -151,24 +151,25 @@ private fun RecordFinal(
         }
     )
 
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(RoundedCornerShape(15))
-            .background(MaterialTheme.colorScheme.primary)
-            .clickable { accept(MainIntent.PlayerController.OnFinalRecord) },
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            modifier = Modifier
-                .size(iconSize)
-                .align(Alignment.Center),
-            painter = painterResource(id = R.drawable.ic_record),
-            contentDescription = "Recording",
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
-        )
+    if (!state.isRecording) {
+        Box(
+            modifier = modifier
+                .size(size)
+                .clip(RoundedCornerShape(15))
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable { accept(MainIntent.PlayerController.OnFinalRecord) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                modifier = Modifier
+                    .size(iconSize)
+                    .align(Alignment.Center),
+                painter = painterResource(id = R.drawable.ic_record),
+                contentDescription = "Recording",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+            )
+        }
     }
-
 }
 
 @Composable
