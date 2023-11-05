@@ -60,7 +60,9 @@ void OneShotSampleSource::mixAudio(float* outBuff, int numChannels, int32_t numF
             }
         }
 
-        if (mCurSampleIndex >= numSamples) {
+        if (mCurSampleIndex >= numSamples && isLooping) {
+            mCurSampleIndex = 0;
+        } else if (mCurSampleIndex >= numSamples) {
             mIsPlaying = false;
         }
     }

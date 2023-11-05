@@ -1,51 +1,34 @@
 package nay.kirill.samplerecorder.domain
 
 import kotlinx.coroutines.flow.Flow
+import nay.kirill.samplerecorder.domain.model.Sample
 
 interface Player {
 
-    fun create(resourceId: Int, speed: Float = 1F, volume: Float = 1F)
+    fun create(samples: List<Sample>)
 
-    fun playLoop()
+    fun playLoop(sampleId: Int)
 
-    fun playOnce()
+    fun playOnce(sampleId: Int)
 
-    fun pause()
+    fun pause(sampleId: Int)
+
+    fun resume(sampleId: Int, isLooping: Boolean)
 
     fun stopAndRelease()
 
-    fun setSpeed(speed: Float)
+    fun setSpeed(sampleId: Int, speed: Float)
 
-    fun setVolume(volume: Float)
+    fun setVolume(sampleId: Int, volume: Float)
 
-    fun seekTo(value: Float)
+    fun seekTo(sampleId: Int, value: Float)
 
-    suspend fun getAmplitude(): Result<List<Float>>
+    suspend fun getAmplitude(sampleId: Int): Result<List<Float>>
 
-    val isPlaying: Boolean
+    fun isPlaying(sampleId: Int): Boolean
 
-    val state: Flow<State>
+    fun observeProgress(sampleId: Int): Flow<Float>
 
-    val progress: Flow<Float>
-
-    val duration: Int
-
-    sealed interface State {
-
-        object UNKNOWN : State
-
-        object Completed : State
-
-        data class Error(val errorCode: Int) : State
-
-        object Prepared : State
-
-        object Play : State
-
-        object Pause : State
-
-        object Released : State
-
-    }
+    fun getDuration(sampleId: Int) : Int
 
 }

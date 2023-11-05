@@ -1,0 +1,98 @@
+//
+// Created by k.naydyuk on 04.11.2023.
+//
+#include <jni.h>
+#include <string>
+#include <oboe/Oboe.h>
+#include "SamplePlayer.h"
+
+static SamplePlayer player;
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_playerInitNative(JNIEnv *env, jobject thiz) {
+    player.initStream();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_loadWavNative(JNIEnv *env, jobject thiz, jbyteArray bytearray, jint id) {
+    int len = env->GetArrayLength(bytearray);
+
+    unsigned char *buf = new unsigned char[len];
+    env->GetByteArrayRegion(bytearray, 0, len, reinterpret_cast<jbyte *>(buf));
+
+    player.loadFromSampleWab(buf, len, id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_startStreamNative(JNIEnv* env, jobject thiz) {
+    player.startStream();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_playNative(JNIEnv *env, jobject thiz, jint id) {
+    player.playSample(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_resumeNative(JNIEnv *env, jobject thiz, jint id) {
+    player.resumeSample(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_pauseNative(JNIEnv *env, jobject thiz, jint id) {
+    player.pauseSample(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_stopNative(JNIEnv *env, jobject thiz, jint id) {
+    player.stopSample(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_setLooping(JNIEnv *env, jobject thiz, jint id, jboolean is_looping) {
+    player.setIsLooping(id, is_looping);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_isPlayingNative(JNIEnv *env, jobject thiz, jint id) {
+    return player.isPlaying(id);
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_getDurationNative(JNIEnv *env, jobject thiz, jint id) {
+    return player.getDurationSec(id);
+}
+
+extern "C"
+JNIEXPORT jfloat JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_getProgressNative(JNIEnv *env, jobject thiz, jint id) {
+    return player.getProgress(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_seekToNative(JNIEnv *env, jobject thiz, jint id, jfloat position) {
+    player.seekTo(id, position);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_setSpeedNative(JNIEnv *env, jobject thiz, jint id, jfloat scale) {
+    player.setSpeed(id, scale);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_setVolumeNative(JNIEnv *env, jobject thiz, jint id, jfloat scale) {
+    player.setVolume(id, scale);
+}

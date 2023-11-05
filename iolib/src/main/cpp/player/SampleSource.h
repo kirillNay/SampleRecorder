@@ -30,73 +30,96 @@ namespace iolib {
  * Concrete examples include OneShotSampleBuffer. One could imagine a LoopingSampleBuffer.
  * Supports stereo position via mPan member.
  */
-class SampleSource: public DataSource {
-public:
-    // Pan position of the audio in a stereo mix
-    // [left:-1.0f] <- [center: 0.0f] -> -[right: 1.0f]
-    static constexpr float PAN_HARDLEFT = -1.0f;
-    static constexpr float PAN_HARDRIGHT = 1.0f;
-    static constexpr float PAN_CENTER = 0.0f;
+    class SampleSource : public DataSource {
+    public:
+        // Pan position of the audio in a stereo mix
+        // [left:-1.0f] <- [center: 0.0f] -> -[right: 1.0f]
+        static constexpr float PAN_HARDLEFT = -1.0f;
+        static constexpr float PAN_HARDRIGHT = 1.0f;
+        static constexpr float PAN_CENTER = 0.0f;
 
-    SampleSource(SampleBuffer *sampleBuffer, float pan)
-     : mSampleBuffer(sampleBuffer), mCurSampleIndex(0), mIsPlaying(false), mGain(1.0f) {
-        setPan(pan);
-    }
-    virtual ~SampleSource() {}
-
-    void setPlayMode() { mCurSampleIndex = 0; mIsPlaying = true; }
-    void setStopMode() { mIsPlaying = false; mCurSampleIndex = 0; }
-
-    bool isPlaying() { return mIsPlaying; }
-
-    void setPan(float pan) {
-        if (pan < PAN_HARDLEFT) {
-            mPan = PAN_HARDLEFT;
-        } else if (pan > PAN_HARDRIGHT) {
-            mPan = PAN_HARDRIGHT;
-        } else {
-            mPan = pan;
+        SampleSource(SampleBuffer *sampleBuffer, float pan)
+                : mSampleBuffer(sampleBuffer), mCurSampleIndex(0), mIsPlaying(false), mGain(1.0f) {
+            setPan(pan);
         }
-        calcGainFactors();
-    }
 
-    float getPan() {
-        return mPan;
-    }
+        virtual ~SampleSource() {}
 
-    void setGain(float gain) {
-        mGain = gain;
-        calcGainFactors();
-    }
+        void setPlayMode() {
+            mCurSampleIndex = 0;
+            mIsPlaying = true;
+        }
 
-    float getGain() {
-        return mGain;
-    }
+        void setStopMode() {
+            mIsPlaying = false;
+            mCurSampleIndex = 0;
+        }
 
-protected:
-    SampleBuffer    *mSampleBuffer;
+        void setPauseMode() { mIsPlaying = false; }
 
-    int32_t mCurSampleIndex;
+        void setResumeMode() { mIsPlaying = true; }
 
-    bool mIsPlaying;
+        bool isPlaying() { return mIsPlaying; }
 
-    // Logical pan value
-    float mPan;
+        bool isLooping;
 
-    // precomputed channel gains for pan
-    float mLeftGain;
-    float mRightGain;
+        void setPan(float pan) {
+            if (pan < PAN_HARDLEFT) {
+                mPan = PAN_HARDLEFT;
+            } else if (pan > PAN_HARDRIGHT) {
+                mPan = PAN_HARDRIGHT;
+            } else {
+                mPan = pan;
+            }
+            calcGainFactors();
+        }
 
-    // Overall gain
-    float mGain;
+        float getPan() {
+            return mPan;
+        }
 
-private:
-    void calcGainFactors() {
-        // useful panning information: http://www.cs.cmu.edu/~music/icm-online/readings/panlaws/
-        float rightPan = (mPan * 0.5) + 0.5;
-        mRightGain = rightPan * mGain;
-        mLeftGain = (1.0 - rightPan) * mGain;    }
-};
+        void setGain(float gain) {
+            mGain = gain;
+            calcGainFactors();
+        }
+
+        float getGain() {
+            return mGain;
+        }
+
+        float getProgress() {
+            return (float) mCurSampleIndex / mSampleBuffer->getNumSamples();
+        }
+
+        void setPosition(float value) {
+            mCurSampleIndex = std::min(mSampleBuffer->getNumSamples() * value, mSampleBuffer->getNumSamples() - (float) 1);
+        }
+
+    protected:
+        SampleBuffer *mSampleBuffer;
+
+        int32_t mCurSampleIndex;
+
+        bool mIsPlaying;
+
+        // Logical pan value
+        float mPan;
+
+        // precomputed channel gains for pan
+        float mLeftGain;
+        float mRightGain;
+
+        // Overall gain
+        float mGain;
+
+    private:
+        void calcGainFactors() {
+            // useful panning information: http://www.cs.cmu.edu/~music/icm-online/readings/panlaws/
+            float rightPan = (mPan * 0.5) + 0.5;
+            mRightGain = rightPan * mGain;
+            mLeftGain = (1.0 - rightPan) * mGain;
+        }
+    };
 
 } // namespace wavlib
 

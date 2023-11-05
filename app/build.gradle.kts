@@ -18,6 +18,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        externalNativeBuild {
+            cmake {
+                cppFlags("")
+                arguments("-DANDROID_STL=c++_shared")
+            }
+        }
     }
 
     buildTypes {
@@ -29,6 +35,7 @@ android {
         debug {
             isMinifyEnabled = false
             isDebuggable = true
+            isJniDebuggable = true
         }
     }
     compileOptions {
@@ -48,6 +55,16 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+    ndkVersion = "26.1.10909125"
+    buildFeatures {
+        prefab = true
     }
 }
 
@@ -74,8 +91,13 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
+    implementation("com.google.oboe:oboe:1.8.0")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("com.github.lincollincol:amplituda:2.2.2")
+
+    implementation(project(":parselib"))
+    implementation(project(":iolib"))
 }

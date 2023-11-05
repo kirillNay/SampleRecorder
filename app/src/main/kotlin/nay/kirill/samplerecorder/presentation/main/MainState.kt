@@ -15,11 +15,11 @@ import nay.kirill.samplerecorder.presentation.main.sampleChooser.SampleGroupUi
 const val MIN_SPEED_VALUE = 0.5F
 const val MAX_SPEED_VALUE = 2F
 
-const val MAX_VOLUME_VALUE = 100F
+const val MAX_VOLUME_VALUE = 2F
 const val MIN_VOLUME_VALUE = 0F
 
 const val INITIAL_SPEED_VALUE = 1F
-const val INITIAL_VOLUME_VALUE = 50F
+const val INITIAL_VOLUME_VALUE = 1F
 
 data class MainState(
     val samples: List<Sample>,

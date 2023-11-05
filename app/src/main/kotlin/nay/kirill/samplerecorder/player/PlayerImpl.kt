@@ -1,148 +1,165 @@
 package nay.kirill.samplerecorder.player
 
-import android.content.Context
-import android.media.MediaPlayer
+import android.content.res.AssetManager
+import android.util.Log
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
 import linc.com.amplituda.Amplituda
 import nay.kirill.samplerecorder.domain.Player
-import java.util.Timer
-import kotlin.concurrent.timer
+import nay.kirill.samplerecorder.domain.model.Sample
+import java.io.IOException
+import java.lang.NullPointerException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal class PlayerImpl(
-    private val context: Context,
+class PlayerImpl(
+    private val assetManager: AssetManager,
     private val amplituda: Amplituda
 ) : Player {
 
-    private var _mediaPlayer: MediaPlayer? = null
-    private val mediaPlayer: MediaPlayer get() = checkNotNull(_mediaPlayer)
+    private var samples: Map<Int, Sample> = mapOf()
 
-    private var mediaResId: Int? = null
+    override fun create(samples: List<Sample>) {
+        playerInitNative()
 
-    override val state = MutableStateFlow<Player.State>(Player.State.UNKNOWN)
-
-    private val _progress = MutableStateFlow(0F)
-    override val progress: Flow<Float> = _progress.asStateFlow()
-    private var progressTimer: Timer? = null
-
-    override val isPlaying: Boolean
-        get() = mediaPlayer.isPlaying
-
-    override val duration: Int
-        get() = mediaPlayer.duration
-
-    override fun create(resourceId: Int, speed: Float, volume: Float) {
-        mediaResId = resourceId
-
-        releasePlayer()
-        _mediaPlayer = MediaPlayer.create(context, resourceId)
-        _mediaPlayer?.setOnCompletionListener {
-            state.value = Player.State.Completed
-            if (!mediaPlayer.isLooping) stopProgressTimer()
-            _progress.value = 1F
-        }
-        _mediaPlayer?.setOnErrorListener { _, what, _ ->
-            state.value = Player.State.Error(what)
-            stopProgressTimer()
-            true
-        }
-        _mediaPlayer?.setOnPreparedListener {
-            state.value = Player.State.Prepared
-            setSpeed(speed)
-            setVolume(volume)
-        }
-    }
-
-    private fun startProgressTimer() {
-        progressTimer = timer(
-            period = mediaPlayer.duration / AMPLITUDE_COUNT.toLong()
-        ) {
-            _progress.value = mediaPlayer.currentPosition.toFloat() / mediaPlayer.duration.toFloat()
-        }
-    }
-
-    private fun stopProgressTimer() {
-        progressTimer?.cancel()
-        progressTimer = null
-    }
-
-    override suspend fun getAmplitude() = suspendCoroutine<Result<List<Float>>> { continuation ->
-        checkNotNull(mediaResId)
-
-        amplituda.processAudio(mediaResId!!).get(
-            // success listener
-            { result ->
-                continuation.resume(
-                    Result.success(
-                        AmplitudeConverter.map(
-                            AMPLITUDE_COUNT,
-                            result.amplitudesAsList()
-                        )
-                    )
-                )
-            },
-            // error listener
-            { exception ->
-                continuation.resume(Result.failure(exception))
+        samples.forEach { sample ->
+            loadWavAsset(sample) {
+                loadWavNative(it, sample.id)
             }
-        )
+        }
+        this.samples = samples.associateBy { it.id }
+        startStreamNative()
     }
 
-    override fun playLoop() {
-        mediaPlayer.isLooping = true
-        mediaPlayer.start()
-        startProgressTimer()
-
-        state.value = Player.State.Play
+    override fun playOnce(sampleId: Int) {
+        setLooping(sampleId, false)
+        playNative(sampleId)
     }
 
-    override fun playOnce() {
-        mediaPlayer.isLooping = false
-        mediaPlayer.start()
-        startProgressTimer()
-
-        state.value = Player.State.Play
+    override fun playLoop(sampleId: Int) {
+        setLooping(sampleId, true)
+        playNative(sampleId)
     }
 
-    override fun pause() {
-        stopProgressTimer()
-        mediaPlayer.pause()
-        state.value = Player.State.Pause
+    override fun pause(sampleId: Int) {
+        pauseNative(sampleId)
+    }
+
+    override fun resume(sampleId: Int, isLooping: Boolean) {
+        setLooping(sampleId, isLooping)
+        resumeNative(sampleId)
     }
 
     override fun stopAndRelease() {
-        releasePlayer()
+
     }
 
-    override fun setSpeed(speed: Float) {
-        mediaPlayer.playbackParams = mediaPlayer.playbackParams.apply { this.speed = speed }
+    override fun setSpeed(sampleId: Int, speed: Float) {
+        setSpeedNative(sampleId, speed)
     }
 
-    override fun setVolume(volume: Float) {
-        mediaPlayer.setVolume(volume, volume)
+    override fun setVolume(sampleId: Int, volume: Float) {
+        setVolumeNative(sampleId, volume)
     }
 
-    override fun seekTo(value: Float) {
-        _progress.value = value
-        mediaPlayer.seekTo((mediaPlayer.duration * value).toInt())
+    override fun seekTo(sampleId: Int, value: Float) {
+        seekToNative(sampleId, value)
     }
 
-    private fun releasePlayer() {
-        if (state.value != Player.State.Released) {
-            stopProgressTimer()
-            _mediaPlayer?.stop()
-            _mediaPlayer?.release()
-            state.value = Player.State.Released
+    override suspend fun getAmplitude(sampleId: Int) = suspendCoroutine<Result<List<Float>>> { continuation ->
+        val sample = samples[sampleId]
+        if(sample == null) {
+            continuation.resume(Result.failure(NullPointerException()))
+            return@suspendCoroutine
+        }
+
+        loadWavAsset(sample) {
+            amplituda.processAudio(it).get(
+                // success listener
+                { result ->
+                    continuation.resume(
+                        Result.success(
+                            AmplitudeConverter.map(
+                                70,
+                                result.amplitudesAsList()
+                            )
+                        )
+                    )
+                },
+                // error listener
+                { exception ->
+                    continuation.resume(Result.failure(exception))
+                }
+            )
         }
     }
 
+    override fun isPlaying(sampleId: Int): Boolean = isPlayingNative(sampleId)
+
+    override fun observeProgress(sampleId: Int): Flow<Float> = flow {
+        while (currentCoroutineContext().isActive) {
+            delay(100)
+            emit(getProgressNative(sampleId))
+        }
+    }
+        .distinctUntilChanged()
+
+    override fun getDuration(sampleId: Int): Int {
+        return getDurationNative(sampleId)
+    }
+
+
+    private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {
+        try {
+            val assetFD = assetManager.openFd(sample.assetName)
+            val dataStream = assetFD.createInputStream()
+            val dataLen = assetFD.length.toInt()
+            val dataBytes = ByteArray(dataLen)
+            dataStream.read(dataBytes, 0, dataLen)
+            onLoad(dataBytes)
+            assetFD.close()
+        } catch (ex: IOException) {
+            Log.i("PlayerImpl", "IOException$ex")
+        }
+    }
+
+    private external fun playerInitNative()
+
+    private external fun playNative(id: Int)
+
+    private external fun resumeNative(id: Int)
+
+    private external fun pauseNative(id: Int)
+
+    private external fun stopNative(id: Int)
+
+    private external fun setLooping(id: Int, isLooping: Boolean)
+
+    private external fun loadWavNative(wavBytes: ByteArray, id: Int)
+
+    private external fun startStreamNative()
+
+    private external fun isPlayingNative(id: Int): Boolean
+
+    private external fun getDurationNative(id: Int): Int
+
+    private external fun getProgressNative(id: Int): Float
+
+    private external fun seekToNative(id: Int, position: Float)
+
+    private external fun setSpeedNative(id: Int, scale: Float)
+
+    private external fun setVolumeNative(id: Int, scale: Float)
+
     companion object {
 
-        const val AMPLITUDE_COUNT = 70
-
+        init {
+            System.loadLibrary("samplerecorder")
+        }
     }
 
 }

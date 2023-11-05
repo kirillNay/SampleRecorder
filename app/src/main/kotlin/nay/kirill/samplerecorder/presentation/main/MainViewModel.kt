@@ -3,19 +3,17 @@ package nay.kirill.samplerecorder.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.Player
+import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
 import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.RemoveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
-import kotlin.math.ln
 
 class MainViewModel(
     private val stateConverter: MainStateConverter,
@@ -43,7 +41,6 @@ class MainViewModel(
     private val _uiState = MutableStateFlow(stateConverter(state))
     val uiState = _uiState.asStateFlow()
 
-    private var playerStateObserverJob: Job? = null
     private var playerProgressObserverJob: Job? = null
 
     init {
@@ -52,6 +49,8 @@ class MainViewModel(
                 state = state.copy(layers = it)
             }
         }
+
+        player.create(state.samples)
     }
 
     fun accept(intent: MainIntent) {
@@ -78,7 +77,7 @@ class MainViewModel(
             }
             else -> {
                 state = state.copy(isRecording = true)
-                player.pause()
+                // player.pause()
             }
         }
 
@@ -98,7 +97,6 @@ class MainViewModel(
     }
 
     private fun resetStateWithLayer(layer: Layer) {
-        player.stopAndRelease()
         state = MainState(
             samples = state.samples,
             currentLayer = layer,
@@ -115,7 +113,7 @@ class MainViewModel(
         val sample = state.samples.first { it.type == intent.type }
 
         if (sample.type == state.selectedSample?.type) {
-            if (!player.isPlaying) player.playOnce()
+            player.playOnce(sample.id)
             return
         }
 
@@ -126,7 +124,7 @@ class MainViewModel(
             currentLayer = state.currentLayer.copy(sample = sample),
             expandedType = null,
             progress = 0F,
-            duration = player.duration
+            duration = player.getDuration(sample.id)
         )
     }
 
@@ -145,80 +143,62 @@ class MainViewModel(
             currentLayer = state.currentLayer.copy(sample = sample),
             expandedType = null,
             progress = 0F,
-            duration = player.duration
+            duration = player.getDuration(sample.id)
         )
     }
 
     private fun onSampleSelected(sample: Sample) {
-        player.create(sample.resourceId, state.currentLayer.speed, state.currentLayer.volume)
-        viewModelScope.launch {
-            delay(SELECTED_SAMPLE_PLAY_DELAY)
-            player.playOnce()
-        }
-        initPlayerObserver()
+        player.playOnce(sample.id)
+        initPlayerObserver(sample)
 
         viewModelScope.launch {
-            player.getAmplitude()
+            player.getAmplitude(sample.id)
                 .onSuccess { state = state.copy(amplitude = it) }
                 .onFailure { state = state.copy(amplitude = null) }
-
         }
     }
 
     private fun reduceOnPlayButton() {
-        if (player.isPlaying) {
-            player.pause()
+        val id = state.currentLayer.sample?.id ?: return
+        state = state.copy(isPlaying = !player.isPlaying(id))
+        if (state.isPlaying) {
+            state.currentLayer.sample?.id?.let { player.resume(it, true) }
         } else {
-            player.playLoop()
+            state.currentLayer.sample?.id?.let(player::pause)
             setupAudioParams()
         }
     }
 
     private fun reduceNewAudioParams(intent: MainIntent.AudioParams.NewParams) {
         val speed = MIN_SPEED_VALUE + (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
-        val volume = ln(MAX_VOLUME_VALUE - (MIN_VOLUME_VALUE + (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume)) / ln(MAX_VOLUME_VALUE)
+        val volume = MAX_VOLUME_VALUE - (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume
 
         state = state.copy(
             currentLayer = state.currentLayer.copy(speed = speed, volume = volume)
         )
         saveLayerUseCase(state.currentLayer)
 
-        if (player.isPlaying) {
-            setupAudioParams()
-        }
+        setupAudioParams()
     }
 
-    private fun initPlayerObserver() {
-        playerStateObserverJob?.cancel()
-        playerStateObserverJob = viewModelScope.launch {
-            player.state.collect { playerState ->
-                when (playerState) {
-                    is Player.State.Play -> state = state.copy(isPlaying = true)
-                    is Player.State.Pause, is Player.State.Completed -> state = state.copy(isPlaying = false)
-                    else -> Unit
-                }
-            }
-        }
-
+    private fun initPlayerObserver(sample: Sample) {
         playerProgressObserverJob?.cancel()
         playerProgressObserverJob = viewModelScope.launch {
-            player.progress.collect { state = state.copy(progress = it) }
+             player.observeProgress(sample.id).collect { state = state.copy(progress = it) }
         }
     }
 
     private fun reduceSeekPlayer(intent: MainIntent.PlayerController.Seek) {
-        player.seekTo(intent.position)
+        state.currentLayer.sample?.id?.let {
+            player.seekTo(it, intent.position)
+        }
     }
 
     private fun setupAudioParams() {
-        player.setSpeed(state.currentLayer.speed)
-        player.setVolume(state.currentLayer.volume)
-    }
-
-    companion object {
-
-        private const val SELECTED_SAMPLE_PLAY_DELAY = 200L
-
+        state.currentLayer.sample?.id?.let { sampleId ->
+            player.setSpeed(sampleId, state.currentLayer.speed)
+            player.setVolume(sampleId, state.currentLayer.volume)
+        }
     }
 
 }
