@@ -2,12 +2,15 @@ package nay.kirill.samplerecorder.player
 
 import android.content.res.AssetManager
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import linc.com.amplituda.Amplituda
 import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.model.Sample
@@ -104,6 +107,15 @@ class PlayerImpl(
 
     override fun getDuration(sampleId: Int): Int = getDurationNative(sampleId)
 
+    override fun startRecording() {
+        startRecordingNative()
+    }
+
+    override fun stopRecording(sampleId: Int) {
+        stopRecordingNative(10)
+        playNative(10)
+    }
+
     private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {
         try {
             val assetFD = assetManager.openFd(sample.assetName)
@@ -145,6 +157,10 @@ class PlayerImpl(
     private external fun setSpeedNative(id: Int, scale: Float)
 
     private external fun setVolumeNative(id: Int, scale: Float)
+
+    private external fun startRecordingNative()
+
+    private external fun stopRecordingNative(id: Int)
 
     companion object {
 

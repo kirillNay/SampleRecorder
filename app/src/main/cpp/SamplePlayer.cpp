@@ -67,6 +67,17 @@ void SamplePlayer::loadFromSampleWab(unsigned char *buff, int length, int id) {
     samplesMap[id] = sample;
 }
 
+void SamplePlayer::loadFromRecorded(RecordedSample sample, int id) {
+    SampleBuffer* sampleBuffer = new SampleBuffer();
+    sampleBuffer->loadSampleData(sample.data, sample.channelCount, sample.sampleRate);
+
+    OneShotSampleSource* source = new OneShotSampleSource(sampleBuffer, 1);
+    source->setGain(1);
+
+    sampleBuffer->resampleData(sampleRate);
+    samplesMap[id] = new Sample(sampleBuffer, source, id);
+}
+
 void SamplePlayer::startStream() {
     int tryCount = 0;
     while (tryCount < 3) {
@@ -93,6 +104,10 @@ void SamplePlayer::startStream() {
     }
 }
 
+void SamplePlayer::stopStream() {
+    audioStream->requestStop();
+}
+
 DataCallbackResult SamplePlayer::DataCallback::onAudioReady(
         AudioStream *audioStream,
         void *audioData,
@@ -108,10 +123,9 @@ DataCallbackResult SamplePlayer::DataCallback::onAudioReady(
 
     memset(audioData, 0, static_cast<size_t>(numFrames) * CHANNEL_COUNT * sizeof(float));
 
-    for(int32_t index = 0; index < parent->samplesMap.size(); index++) {
-        if (parent->samplesMap.at(index)->source->isPlaying()) {
-            parent->samplesMap.at(index)->source->mixAudio((float*)audioData, CHANNEL_COUNT,
-                                                     numFrames);
+    for (auto const& [key, val] : parent->samplesMap) {
+        if (val->source->isPlaying()) {
+            val->source->mixAudio((float*)audioData, CHANNEL_COUNT, numFrames);
         }
     }
 

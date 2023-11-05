@@ -74,12 +74,12 @@ class MainViewModel(
     private fun reduceOnLayer() {
         when {
             state.isRecording -> {
-                // TODO update layer
                 state = state.copy(isRecording = false)
+                player.stopRecording(10)
             }
             else -> {
                 state = state.copy(isRecording = true)
-                // player.pause()
+                player.startRecording()
             }
         }
 

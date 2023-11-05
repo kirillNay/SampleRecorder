@@ -5,8 +5,11 @@
 #include <string>
 #include <oboe/Oboe.h>
 #include "SamplePlayer.h"
+#include "MicRecorder.h"
 
 static SamplePlayer player;
+
+static MicRecorder recorder;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -95,4 +98,21 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_nay_kirill_samplerecorder_player_PlayerImpl_setVolumeNative(JNIEnv *env, jobject thiz, jint id, jfloat scale) {
     player.setVolume(id, scale);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_startRecordingNative(JNIEnv *env, jobject thiz) {
+    player.stopStream();
+    recorder.initStream();
+    recorder.startRecord();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_stopRecordingNative(JNIEnv *env, jobject thiz, jint id) {
+    recorder.stopRecord();
+    auto result = recorder.getRecord();
+    player.loadFromRecorded(result, id);
+    player.startStream();
 }

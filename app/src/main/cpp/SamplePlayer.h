@@ -10,6 +10,8 @@
 #include <oboe/Oboe.h>
 #include "player/SampleBuffer.h"
 #include "player/OneShotSampleSource.h"
+#include "MicRecorder.h"
+#include "RecordedSample.h"
 
 struct Sample {
 
@@ -28,7 +30,11 @@ public:
 
     void loadFromSampleWab(unsigned char *buff, int length, int id);
 
+    void loadFromRecorded(RecordedSample sample, int id);
+
     void startStream();
+
+    void stopStream();
 
     void playSample(int id);
 

@@ -37,6 +37,14 @@ void SampleBuffer::loadSampleData(parselib::WavStreamReader* reader) {
     reader->getDataFloat(mSampleData, reader->getNumSampleFrames());
 }
 
+void SampleBuffer::loadSampleData(std::vector<float_t> data, int channelCount, int32_t sampleRate) {
+    mAudioProperties.channelCount = channelCount;
+    mAudioProperties.sampleRate = sampleRate;
+
+    mNumSamples = data.size();
+    mSampleData = (float*) &data[0];
+}
+
 void SampleBuffer::unloadSampleData() {
     if (mSampleData != nullptr) {
         delete[] mSampleData;
