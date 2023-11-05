@@ -10,9 +10,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven(url = "https://jitpack.io")
     }
 }
 
 rootProject.name = "SampleRecorder"
 include(":app")
- 
+include(":parselib")
+include(":iolib")
+include(":resampler")
