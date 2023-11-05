@@ -14,6 +14,7 @@ import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.RemoveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
+import nay.kirill.samplerecorder.domain.usecase.SetPlayingLayerUseCase
 
 class MainViewModel(
     private val stateConverter: MainStateConverter,
@@ -21,6 +22,7 @@ class MainViewModel(
     private val saveLayerUseCase: SaveLayerUseCase,
     private val createLayerUseCase: CreateLayerUseCase,
     private val removeLayerUseCase: RemoveLayerUseCase,
+    private val setPlayingLayerUseCase: SetPlayingLayerUseCase,
     observeLayersUseCase: ObserveLayersUseCase,
     getSamplesUseCase: GetSamplesUseCase
 ) : ViewModel() {
@@ -29,7 +31,7 @@ class MainViewModel(
 
     private var state: MainState = MainState(
         samples = getSamplesUseCase(),
-        currentLayer = createLayerUseCase()
+        currentLayerId = createLayerUseCase().id
     )
         private set(value) {
             if (value == field) return
@@ -94,16 +96,16 @@ class MainViewModel(
 
     private fun reduceRemoveLayer(intent: MainIntent.Layers.RemoveLayer) {
         removeLayerUseCase(intent.id)
+        state.layers.find { it.id == intent.id }?.sample?.let { player.stop(it.id) }
     }
 
     private fun resetStateWithLayer(layer: Layer) {
         state = MainState(
             samples = state.samples,
-            currentLayer = layer,
-            layers = state.layers,
-            isPlaying = true
+            currentLayerId = layer.id,
+            layers = state.layers
         )
-        layer.sample?.let(::onSampleSelected)
+        layer.sample?.let { onSampleSelected(it, layer.isPlaying) }
     }
 
     private fun reduceOpenLayerModal(intent: MainIntent.PlayerController.LayersModal) {
@@ -114,19 +116,17 @@ class MainViewModel(
         val sample = state.samples.first { it.type == intent.type }
 
         if (sample.type == state.selectedSample?.type) {
-            player.playOnce(sample.id)
+            player.playLoop(sample.id)
             return
         }
 
         onSampleSelected(sample)
-        saveLayerUseCase(state.currentLayer.copy(sample = sample))
+        state.currentLayer?.let { saveLayerUseCase(it.copy(sample = sample)) }
 
         state = state.copy(
-            currentLayer = state.currentLayer.copy(sample = sample),
             expandedType = null,
             progress = 0F,
-            duration = player.getDuration(sample.id),
-            isPlaying = true
+            duration = player.getDuration(sample.id)
         )
     }
 
@@ -139,20 +139,21 @@ class MainViewModel(
     private fun reduceSelectSample(intent: MainIntent.SelectSample.Sample) {
         val sample = state.samples.find { it.id == intent.id } ?: return
         onSampleSelected(sample)
-        saveLayerUseCase(state.currentLayer.copy(sample = sample))
+        state.currentLayer?.let { saveLayerUseCase(it.copy(sample = sample)) }
 
         state = state.copy(
-            currentLayer = state.currentLayer.copy(sample = sample),
             expandedType = null,
             progress = 0F,
-            duration = player.getDuration(sample.id),
-            isPlaying = true
+            duration = player.getDuration(sample.id)
         )
     }
 
-    private fun onSampleSelected(sample: Sample) {
-        stopCurrentSample()
-        player.playOnce(sample.id)
+    private fun onSampleSelected(sample: Sample, play: Boolean = true) {
+        if (play) {
+            stopCurrentSample()
+            player.playLoop(sample.id)
+            setPlayingLayerUseCase(state.currentLayerId, true)
+        }
         initPlayerObserver(sample)
 
         viewModelScope.launch {
@@ -163,23 +164,21 @@ class MainViewModel(
     }
 
     private fun reduceOnPlayButton() {
-        val id = state.currentLayer.sample?.id ?: return
-        state = state.copy(isPlaying = !state.isPlaying)
+        val id = state.currentLayer?.sample?.id ?: return
+
         if (state.isPlaying) {
-            player.resume(id, true)
-        } else {
             player.pause(id)
+        } else {
+            player.resume(id)
         }
+        setPlayingLayerUseCase(state.currentLayerId, !state.isPlaying)
     }
 
     private fun reduceNewAudioParams(intent: MainIntent.AudioParams.NewParams) {
         val speed = MAX_SPEED_VALUE - (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
         val volume = MAX_VOLUME_VALUE - (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume
 
-        state = state.copy(
-            currentLayer = state.currentLayer.copy(speed = speed, volume = volume)
-        )
-        saveLayerUseCase(state.currentLayer)
+        state.currentLayer?.let { saveLayerUseCase(it.copy(speed = speed, volume = volume)) }
 
         setupAudioParams()
     }
@@ -188,31 +187,28 @@ class MainViewModel(
         playerProgressObserverJob?.cancel()
         playerProgressObserverJob = viewModelScope.launch {
              player.observeProgress(sample.id).collect { progress ->
-                 state = if (progress >= 1F) {
-                     state.copy(progress = progress, isPlaying = false)
-                 } else {
-                     state.copy(progress = progress)
-                 }
-
+                 state = state.copy(progress = progress)
              }
         }
     }
 
     private fun reduceSeekPlayer(intent: MainIntent.PlayerController.Seek) {
-        state.currentLayer.sample?.id?.let {
+        state.currentLayer?.sample?.id?.let {
             player.seekTo(it, intent.position)
         }
     }
 
     private fun setupAudioParams() {
-        state.currentLayer.sample?.id?.let { sampleId ->
-            player.setSpeed(sampleId, state.currentLayer.speed)
-            player.setVolume(sampleId, state.currentLayer.volume)
+        state.currentLayer?.sample?.id?.let { sampleId ->
+            val layer = state.currentLayer ?: return
+
+            player.setSpeed(sampleId, layer.speed)
+            player.setVolume(sampleId, layer.volume)
         }
     }
 
     private fun stopCurrentSample() {
-        val sample = state.currentLayer.sample ?: return
+        val sample = state.currentLayer?.sample ?: return
 
         player.stop(sample.id)
     }

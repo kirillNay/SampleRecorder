@@ -1,9 +1,12 @@
 package nay.kirill.samplerecorder.presentation.main.audioController
 
 data class AudioControllerState(
-    val initialVolume: Float,
-    val initialSpeed: Float,
+    val layerId: Int,
+    val volume: Float,
+    val speed: Float,
 
+    val stepVolumeScale: Float,
+    val stepSpeedScale: Float,
     val initialVolumeText: String,
     val initialSpeedText: String,
     val maxVolumeText: String,

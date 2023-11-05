@@ -21,15 +21,15 @@ class MainStateConverter(
         return when {
             state.isRecording -> MainUIState.Recording(
                 playerControllerState = PlayerControllerState.EmptySample(
-                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
+                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = true
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
-            state.currentLayer.sample == null -> MainUIState.Empty(
+            state.currentLayer?.sample == null -> MainUIState.Empty(
                 chooserState = state.chooserState(),
                 playerControllerState = PlayerControllerState.EmptySample(
-                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
+                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = false
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
@@ -40,7 +40,7 @@ class MainStateConverter(
                 playerControllerState = PlayerControllerState.Sampling(
                     playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
                     contentDescription = if (state.isPlaying) "Stop" else "Play",
-                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayer.id),
+                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = false
                 ),
                 timeline = state.amplitude?.let {
@@ -52,8 +52,11 @@ class MainStateConverter(
                     )
                 } ?: PlayerTimelineState.Empty,
                 audioControllerState = AudioControllerState(
-                    initialVolume = state.initialVolumeScale,
-                    initialSpeed = state.initialSpeedScale,
+                    layerId = state.currentLayerId,
+                    volume = state.initialVolumeScale,
+                    speed = state.initialSpeedScale,
+                    stepSpeedScale = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
+                    stepVolumeScale = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE),
                     initialSpeedText = "$INITIAL_SPEED_VALUE",
                     initialVolumeText = "$INITIAL_VOLUME_VALUE",
                     maxSpeedText = "$MAX_SPEED_VALUE",
@@ -66,7 +69,7 @@ class MainStateConverter(
 
     private fun MainState.layersBottomSheetState() = LayersBottomSheetState(
         opened = isLayersOpen,
-        layers = layers.toUI(selectedId = currentLayer.id),
+        layers = layers.toUI(selectedId = currentLayerId),
         editAvailable = !isRecording
     )
 
@@ -81,7 +84,7 @@ class MainStateConverter(
     private fun Int.toDuration(): String = "${this / 1_000 / 60}".padStart(2, '0') + ":" + "${this / 1_000 % 60}".padStart(2, '0')
 
     private fun MainState.chooserState() = SampleChooserUIState(
-        sampleGroups = samples.convertToGroups(currentLayer.sample?.id, expandedType)
+        sampleGroups = samples.convertToGroups(currentLayer?.sample?.id, expandedType)
     )
 
     private fun List<Sample>.convertToGroups(selectedSampleId: Int?, expandedType: SampleType?): List<SampleGroupUi> {

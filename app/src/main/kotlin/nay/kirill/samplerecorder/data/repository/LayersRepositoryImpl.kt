@@ -38,4 +38,14 @@ internal class LayersRepositoryImpl : LayersRepository {
         _layersFlow.value = _layersFlow.value.toMutableList().apply { removeIf { it.id == id } }
     }
 
+    override fun setLayerPlaying(id: Int, isPlaying: Boolean) {
+        _layersFlow.value = _layersFlow.value.toMutableList().map {
+            if (it.id == id) {
+                it.copy(isPlaying = isPlaying)
+            } else {
+                it
+            }
+        }
+    }
+
 }

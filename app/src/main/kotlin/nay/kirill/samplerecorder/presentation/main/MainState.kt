@@ -23,10 +23,9 @@ const val INITIAL_VOLUME_VALUE = 1F
 
 data class MainState(
     val samples: List<Sample>,
-    val currentLayer: Layer,
+    val currentLayerId: Int,
     val layers: List<Layer> = emptyList(),
     val expandedType: SampleType? = null,
-    val isPlaying: Boolean = false,
     val amplitude: List<Float>? = null,
     val progress: Float = 0F,
     val initialSpeedScale: Float = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
@@ -36,7 +35,11 @@ data class MainState(
     val isRecording: Boolean = false
 ) {
 
-    val selectedSample: Sample? get() = currentLayer.sample
+    val currentLayer: Layer? get() = layers.find { it.id == currentLayerId }
+
+    val selectedSample: Sample? get() = currentLayer?.sample
+
+    val isPlaying: Boolean get() = currentLayer?.isPlaying ?: false
 
 }
 

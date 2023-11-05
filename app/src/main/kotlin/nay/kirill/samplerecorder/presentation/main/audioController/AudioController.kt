@@ -91,10 +91,10 @@ fun AudioController(
                 val circleDiameter = 8.dp
                 val circleDiameterPx = LocalDensity.current.run { circleDiameter.toPx() }
 
-                val initialX = constraints.maxWidth * state.initialSpeed - circleDiameterPx / 2
-                val initialY = constraints.maxHeight * state.initialVolume - circleDiameterPx / 2
+                val initialX = constraints.maxWidth * state.speed - circleDiameterPx / 2
+                val initialY = constraints.maxHeight * state.volume - circleDiameterPx / 2
 
-                var offset by remember {
+                var offset by remember(state.layerId) {
                     mutableStateOf(Offset(initialX, initialY))
                 }
 
@@ -134,7 +134,7 @@ fun AudioController(
                             //drawing steps
                             drawRoundRect(
                                 primaryColor,
-                                Offset(size.width * state.initialSpeed, size.height - 50F),
+                                Offset(size.width * state.stepSpeedScale, size.height - 50F),
                                 Size(3F, 50F)
                             )
 
@@ -142,12 +142,12 @@ fun AudioController(
                                 textMeasurer = textMeasure,
                                 text = state.initialSpeedText,
                                 style = textStyle.copy(color = color),
-                                topLeft = Offset(size.width * state.initialSpeed - 15F, size.height - 120F)
+                                topLeft = Offset(size.width * state.stepSpeedScale - 15F, size.height - 120F)
                             )
 
                             drawRoundRect(
                                 primaryColor,
-                                Offset(0F, size.height * state.initialVolume),
+                                Offset(0F, size.height * state.stepVolumeScale),
                                 Size(50F, 3F)
                             )
 
@@ -155,7 +155,7 @@ fun AudioController(
                                 textMeasurer = textMeasure,
                                 text = state.initialVolumeText,
                                 style = textStyle.copy(color = color),
-                                topLeft = Offset(80F, size.height * state.initialVolume - 30F)
+                                topLeft = Offset(80F, size.height * state.stepVolumeScale - 30F)
                             )
 
                             drawRoundRect(
@@ -237,7 +237,7 @@ private fun AudioControllerPreview() {
                 .padding(12.dp)
         ) {
             AudioController(
-                state = AudioControllerState(0.5F, 0.5F, "1x", "1x", "2x", "2x")
+                state = AudioControllerState(1, 0.5F, 0.5F, 0.5F, 0.5F, "1x", "1x", "2x", "2x")
             ) {}
         }
     }

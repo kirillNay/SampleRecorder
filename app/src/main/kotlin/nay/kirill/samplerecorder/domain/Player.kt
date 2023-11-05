@@ -9,11 +9,9 @@ interface Player {
 
     fun playLoop(sampleId: Int)
 
-    fun playOnce(sampleId: Int)
-
     fun pause(sampleId: Int)
 
-    fun resume(sampleId: Int, isLooping: Boolean)
+    fun resume(sampleId: Int)
 
     fun stop(sampleId: Int)
 

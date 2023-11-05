@@ -35,11 +35,6 @@ class PlayerImpl(
         startStreamNative()
     }
 
-    override fun playOnce(sampleId: Int) {
-        setLooping(sampleId, false)
-        playNative(sampleId)
-    }
-
     override fun playLoop(sampleId: Int) {
         setLooping(sampleId, true)
         playNative(sampleId)
@@ -49,8 +44,7 @@ class PlayerImpl(
         pauseNative(sampleId)
     }
 
-    override fun resume(sampleId: Int, isLooping: Boolean) {
-        setLooping(sampleId, isLooping)
+    override fun resume(sampleId: Int) {
         resumeNative(sampleId)
     }
 
