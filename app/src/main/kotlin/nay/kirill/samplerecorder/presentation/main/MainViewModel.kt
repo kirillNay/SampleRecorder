@@ -100,7 +100,8 @@ class MainViewModel(
         state = MainState(
             samples = state.samples,
             currentLayer = layer,
-            layers = state.layers
+            layers = state.layers,
+            isPlaying = true
         )
         layer.sample?.let(::onSampleSelected)
     }
@@ -124,7 +125,8 @@ class MainViewModel(
             currentLayer = state.currentLayer.copy(sample = sample),
             expandedType = null,
             progress = 0F,
-            duration = player.getDuration(sample.id)
+            duration = player.getDuration(sample.id),
+            isPlaying = true
         )
     }
 
@@ -143,11 +145,13 @@ class MainViewModel(
             currentLayer = state.currentLayer.copy(sample = sample),
             expandedType = null,
             progress = 0F,
-            duration = player.getDuration(sample.id)
+            duration = player.getDuration(sample.id),
+            isPlaying = true
         )
     }
 
     private fun onSampleSelected(sample: Sample) {
+        stopCurrentSample()
         player.playOnce(sample.id)
         initPlayerObserver(sample)
 
@@ -160,17 +164,16 @@ class MainViewModel(
 
     private fun reduceOnPlayButton() {
         val id = state.currentLayer.sample?.id ?: return
-        state = state.copy(isPlaying = !player.isPlaying(id))
+        state = state.copy(isPlaying = !state.isPlaying)
         if (state.isPlaying) {
-            state.currentLayer.sample?.id?.let { player.resume(it, true) }
+            player.resume(id, true)
         } else {
-            state.currentLayer.sample?.id?.let(player::pause)
-            setupAudioParams()
+            player.pause(id)
         }
     }
 
     private fun reduceNewAudioParams(intent: MainIntent.AudioParams.NewParams) {
-        val speed = MIN_SPEED_VALUE + (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
+        val speed = MAX_SPEED_VALUE - (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
         val volume = MAX_VOLUME_VALUE - (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume
 
         state = state.copy(
@@ -184,7 +187,14 @@ class MainViewModel(
     private fun initPlayerObserver(sample: Sample) {
         playerProgressObserverJob?.cancel()
         playerProgressObserverJob = viewModelScope.launch {
-             player.observeProgress(sample.id).collect { state = state.copy(progress = it) }
+             player.observeProgress(sample.id).collect { progress ->
+                 state = if (progress >= 1F) {
+                     state.copy(progress = progress, isPlaying = false)
+                 } else {
+                     state.copy(progress = progress)
+                 }
+
+             }
         }
     }
 
@@ -199,6 +209,12 @@ class MainViewModel(
             player.setSpeed(sampleId, state.currentLayer.speed)
             player.setVolume(sampleId, state.currentLayer.volume)
         }
+    }
+
+    private fun stopCurrentSample() {
+        val sample = state.currentLayer.sample ?: return
+
+        player.stop(sample.id)
     }
 
 }

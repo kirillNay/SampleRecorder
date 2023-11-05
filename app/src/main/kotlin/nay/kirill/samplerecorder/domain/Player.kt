@@ -15,7 +15,7 @@ interface Player {
 
     fun resume(sampleId: Int, isLooping: Boolean)
 
-    fun stopAndRelease()
+    fun stop(sampleId: Int)
 
     fun setSpeed(sampleId: Int, speed: Float)
 

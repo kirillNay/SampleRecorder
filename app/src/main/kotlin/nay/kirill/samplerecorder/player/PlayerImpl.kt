@@ -54,8 +54,8 @@ class PlayerImpl(
         resumeNative(sampleId)
     }
 
-    override fun stopAndRelease() {
-
+    override fun stop(sampleId: Int) {
+        stopNative(sampleId)
     }
 
     override fun setSpeed(sampleId: Int, speed: Float) {
@@ -108,10 +108,7 @@ class PlayerImpl(
     }
         .distinctUntilChanged()
 
-    override fun getDuration(sampleId: Int): Int {
-        return getDurationNative(sampleId)
-    }
-
+    override fun getDuration(sampleId: Int): Int = getDurationNative(sampleId)
 
     private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {
         try {

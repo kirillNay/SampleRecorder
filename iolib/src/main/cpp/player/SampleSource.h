@@ -57,7 +57,12 @@ namespace iolib {
 
         void setPauseMode() { mIsPlaying = false; }
 
-        void setResumeMode() { mIsPlaying = true; }
+        void setResumeMode() {
+            mIsPlaying = true;
+            if (mCurSampleIndex >= mSampleBuffer->getNumSamples()) {
+                mCurSampleIndex = 0;
+            }
+        }
 
         bool isPlaying() { return mIsPlaying; }
 
