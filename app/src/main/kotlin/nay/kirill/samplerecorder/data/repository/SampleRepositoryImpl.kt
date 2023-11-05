@@ -28,10 +28,30 @@ internal class SampleRepositoryImpl : SampleRepository {
             type = SampleType.DRUM
         ),
         Sample(
-            name = "Percussion",
-            assetName = "percussion.wav",
-            type = SampleType.DRUM
-        )
+            name = "Anxiety",
+            assetName = "Anxiety.wav",
+            type = SampleType.GUITAR
+        ),
+        Sample(
+            name = "Aucustic",
+            assetName = "Aucustic.wav",
+            type = SampleType.GUITAR
+        ),
+        Sample(
+            name = "Chill",
+            assetName = "Chill.wav",
+            type = SampleType.GUITAR
+        ),
+        Sample(
+            name = "Smooth",
+            assetName = "Smooth.wav",
+            type = SampleType.GUITAR
+        ),
+        Sample(
+            name = "Warm",
+            assetName = "Warm.wav",
+            type = SampleType.GUITAR
+        ),
     )
 
     override fun getLocalSamples(): List<Sample> = samples
