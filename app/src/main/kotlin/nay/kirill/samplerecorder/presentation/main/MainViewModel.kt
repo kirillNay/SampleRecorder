@@ -129,8 +129,6 @@ class MainViewModel(
                 )
                 layer?.let { saveLayerUseCase(it) }
                 player.stopVoiceRecording(sample.id)
-                player.playLoop(sample.id)
-                player.pause(sample.id)
             }
             else -> {
                 state = state.copy(isRecording = true)
