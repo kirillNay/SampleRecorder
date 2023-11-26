@@ -17,7 +17,7 @@ using namespace parselib;
 using namespace iolib;
 using namespace std;
 
-static const char *TAG = "SamplePlayer";
+static const char *TAG = "SampleRecorderNative";
 static const int CHANNEL_COUNT = 2;
 
 namespace little_endian_io {
@@ -42,7 +42,7 @@ bool SamplePlayer::initStream() {
     builder.setDataCallback(dataCallback);
     builder.setErrorCallback(errorCallback);
     builder.setPerformanceMode(PerformanceMode::LowLatency);
-    builder.setSharingMode(SharingMode::Exclusive);
+    builder.setSharingMode(SharingMode::Shared);
     builder.setSampleRateConversionQuality(SampleRateConversionQuality::Medium);
 
     Result result = builder.openStream(audioStream);
@@ -155,32 +155,53 @@ void SamplePlayer::ErrorCallback::onErrorAfterClose(AudioStream *oboeStream, Res
 }
 
 void SamplePlayer::playSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Play audio sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setPlayMode();
+        __android_log_print(ANDROID_LOG_INFO, TAG, "Number of samples: %d", samplesMap[id]->source->mSampleBuffer->getNumSamples());
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::resumeSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Resume audio sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setResumeMode();
+        __android_log_print(ANDROID_LOG_INFO, TAG, "Number of samples: %d", samplesMap[id]->source->mSampleBuffer->getNumSamples());
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::setIsLooping(int id, bool isLooping) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Set looping = %b sample with id %d", isLooping, id);
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->isLooping = isLooping;
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::pauseSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Pause sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setPauseMode();
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::stopSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Stop sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setStopMode();
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 

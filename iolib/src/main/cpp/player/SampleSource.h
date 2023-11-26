@@ -66,7 +66,7 @@ namespace iolib {
 
         bool isPlaying() { return mIsPlaying; }
 
-        bool isLooping;
+        bool isLooping = true;
 
         void setPan(float pan) {
             if (pan < PAN_HARDLEFT) {
@@ -100,10 +100,10 @@ namespace iolib {
             mCurSampleIndex = std::min(mSampleBuffer->getNumSamples() * value, mSampleBuffer->getNumSamples() - (float) 1);
         }
 
-    protected:
         SampleBuffer *mSampleBuffer;
+    protected:
 
-        int32_t mCurSampleIndex;
+        int32_t mCurSampleIndex = 0;
 
         bool mIsPlaying;
 

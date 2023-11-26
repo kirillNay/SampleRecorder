@@ -8,7 +8,7 @@
 using namespace oboe;
 using namespace iolib;
 
-static const char* TAG = "MicRecorder";
+static const char* TAG = "SampleRecorderNative";
 
 bool MicRecorder::initStream() {
     sample = RecordedSample();
@@ -68,6 +68,15 @@ void MicRecorder::startRecord() {
 void MicRecorder::stopRecord() {
     recordingStream->requestStop();
     recordingStream->close();
+
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Sample recorded from mic:"
+                                               "\n\tSample rate: %d"
+                                               "\n\tSample channels: %d"
+                                               "\n\tSample count: %d",
+                                               sample.sampleRate,
+                                               sample.channelCount,
+                                               sample.data.size()
+    );
 }
 
 RecordedSample MicRecorder::getRecord() {
