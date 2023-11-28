@@ -12,6 +12,7 @@
 #include "player/OneShotSampleSource.h"
 #include "MicRecorder.h"
 #include "RecordedSample.h"
+#include "FileSaver.h"
 
 struct Sample {
 
@@ -101,6 +102,8 @@ private:
 
     bool isRecording;
     std::vector<float_t> finalRecord;
+
+    FileSaver *fileSaver = new FileSaver();
 
 };
 
