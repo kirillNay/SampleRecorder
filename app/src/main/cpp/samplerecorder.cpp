@@ -60,6 +60,12 @@ Java_nay_kirill_samplerecorder_player_PlayerImpl_stopNative(JNIEnv *env, jobject
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_releasePlayerNative(JNIEnv *env, jobject thiz) {
+    player.releasePlayer();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_nay_kirill_samplerecorder_player_PlayerImpl_setLooping(JNIEnv *env, jobject thiz, jint id, jboolean is_looping) {
     player.setIsLooping(id, is_looping);
 }

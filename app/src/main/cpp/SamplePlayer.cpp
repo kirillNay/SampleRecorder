@@ -52,6 +52,7 @@ bool SamplePlayer::initStream() {
     }
 
     sampleRate = audioStream->getSampleRate();
+    bitDepth = audioStream->getBytesPerSample() * 8;
 
     return true;
 }
@@ -201,6 +202,14 @@ void SamplePlayer::stopSample(int id) {
     }
 }
 
+void SamplePlayer::releasePlayer() {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Release player!");
+
+    samplesMap.clear();
+    audioStream->requestStop();
+    audioStream->close();
+}
+
 bool SamplePlayer::isPlaying(int id) {
     if (samplesMap[id] != nullptr) {
         return samplesMap[id]->source->isPlaying();
@@ -250,6 +259,7 @@ void SamplePlayer::setRecording() {
 
 void SamplePlayer::stopRecording() {
     isRecording = false;
-    fileSaver->saveWav(finalRecord, CHANNEL_COUNT, sampleRate, audioStream->getBytesPerSample());
+    fileSaver->saveWav(finalRecord, CHANNEL_COUNT, sampleRate, bitDepth);
+    finalRecord.clear();
 }
 

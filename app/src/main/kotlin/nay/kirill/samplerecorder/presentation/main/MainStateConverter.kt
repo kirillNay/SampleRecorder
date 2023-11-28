@@ -23,7 +23,8 @@ class MainStateConverter(
 
     override fun invoke(state: MainState): MainUIState {
         return when {
-            state.isRecording -> MainUIState.Recording(
+            state.finalRecordState != FinalRecordState.None -> state.finalRecordState()
+            state.isVoiceRecording -> SamplingUIState.Recording(
                 playerControllerState = PlayerControllerState.EmptySample(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = true,
@@ -32,16 +33,7 @@ class MainStateConverter(
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
-            state.isFinalRecording -> MainUIState.FinalRecording(
-                playerControllerState = PlayerControllerState.EmptySample(
-                    layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
-                    isRecording = false,
-                    isFinalRecording = true,
-                    isRecordAvailable = isRecordPermissionGranted
-                ),
-                layersBottomSheetState = state.layersBottomSheetState()
-            )
-            state.currentLayer?.sample == null -> MainUIState.Empty(
+            state.currentLayer?.sample == null -> SamplingUIState.Empty(
                 chooserState = state.chooserState(),
                 playerControllerState = PlayerControllerState.EmptySample(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
@@ -52,7 +44,7 @@ class MainStateConverter(
                 layersBottomSheetState = state.layersBottomSheetState()
             )
 
-            else -> MainUIState.Sampling(
+            else -> SamplingUIState.Sampling(
                 chooserState = state.chooserState(),
                 playerControllerState = PlayerControllerState.Sampling(
                     playingIcon = if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
@@ -92,7 +84,7 @@ class MainStateConverter(
     private fun MainState.layersBottomSheetState() = LayersBottomSheetState(
         opened = isLayersOpen,
         layers = layers.toUI(selectedId = currentLayerId),
-        editAvailable = !isRecording
+        editAvailable = !isVoiceRecording
     )
 
     private fun List<Layer>.toUI(selectedId: Int): List<LayerUi> = map { layer ->
@@ -156,5 +148,19 @@ class MainStateConverter(
         name = name,
         isSelected = id == selectedSampleId
     )
+
+    private fun MainState.finalRecordState() = when (finalRecordState) {
+        FinalRecordState.Process -> FinalRecordUIState.Recording(
+            playerControllerState = PlayerControllerState.EmptySample(
+                layerName = resourceManager.getString(R.string.layer_name, currentLayerId),
+                isRecording = false,
+                isFinalRecording = true,
+                isRecordAvailable = isRecordPermissionGranted
+            ),
+            layersBottomSheetState = layersBottomSheetState()
+        )
+        FinalRecordState.Complete -> FinalRecordUIState.Complete
+        else -> FinalRecordUIState.Saving
+    }
 
 }

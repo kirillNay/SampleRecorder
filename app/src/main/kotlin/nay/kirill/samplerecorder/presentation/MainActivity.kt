@@ -6,9 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import nay.kirill.samplerecorder.presentation.main.MainScreen
 import nay.kirill.samplerecorder.presentation.main.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -23,12 +20,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainScreen(viewModel)
         }
-
-        viewModel.startIntent
-            .onEach { intent ->
-                startActivity(intent, null)
-            }
-            .launchIn(lifecycleScope)
     }
 
     override fun onResume() {

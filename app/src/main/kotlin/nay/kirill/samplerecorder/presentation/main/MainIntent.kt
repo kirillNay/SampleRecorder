@@ -48,4 +48,14 @@ sealed interface MainIntent {
         ) : AudioParams
 
     }
+
+    sealed interface FinalRecord : MainIntent {
+
+        data class Share(
+            val fileName: String
+        ) : FinalRecord
+
+        object Reset : FinalRecord
+
+    }
 }

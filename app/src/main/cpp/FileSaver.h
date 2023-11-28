@@ -14,7 +14,7 @@ public:
             std::vector<float_t> data,
             int channelCount,
             int sampleRate,
-            int bytesPerSample
+            int bitRate
     );
 private:
     void writeToFile(std::ofstream &file, int value, int size);

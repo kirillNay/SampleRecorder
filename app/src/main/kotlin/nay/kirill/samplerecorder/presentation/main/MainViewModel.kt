@@ -1,12 +1,8 @@
 package nay.kirill.samplerecorder.presentation.main
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -14,13 +10,13 @@ import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
+import nay.kirill.samplerecorder.domain.usecase.ClearLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.CreateLayerUseCase
-import nay.kirill.samplerecorder.domain.usecase.CreateVoiceSample
+import nay.kirill.samplerecorder.domain.usecase.CreateVoiceSampleUseCase
 import nay.kirill.samplerecorder.domain.usecase.ObserveLayersUseCase
 import nay.kirill.samplerecorder.domain.usecase.RemoveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SaveLayerUseCase
 import nay.kirill.samplerecorder.domain.usecase.SetPlayingLayerUseCase
-import java.io.File
 
 class MainViewModel(
     private val stateConverter: MainStateConverter,
@@ -29,13 +25,11 @@ class MainViewModel(
     private val createLayerUseCase: CreateLayerUseCase,
     private val removeLayerUseCase: RemoveLayerUseCase,
     private val setPlayingLayerUseCase: SetPlayingLayerUseCase,
-    private val createVoiceSample: CreateVoiceSample,
+    private val createVoiceSampleUseCase: CreateVoiceSampleUseCase,
+    private val clearLayersUseCase: ClearLayersUseCase,
     observeLayersUseCase: ObserveLayersUseCase,
     getSamplesUseCase: GetSamplesUseCase,
-    private val context: Context
 ) : ViewModel() {
-
-    val startIntent: MutableSharedFlow<Intent> = MutableSharedFlow()
 
     private val layersFlow = observeLayersUseCase()
 
@@ -80,6 +74,8 @@ class MainViewModel(
             is MainIntent.Layers.RemoveLayer -> reduceRemoveLayer(intent)
             is MainIntent.Layers.SetPlaying -> reduceSetLayerPlaying(intent)
             is MainIntent.PlayerController.OnFinalRecord -> reduceOnFinalRecord()
+            is MainIntent.FinalRecord.Share -> reduceShareFile(intent)
+            is MainIntent.FinalRecord.Reset -> reduceReset()
         }
     }
 
@@ -95,23 +91,24 @@ class MainViewModel(
     }
 
     private fun reduceOnFinalRecord() {
-        when {
-            state.isFinalRecording -> {
+        when (state.finalRecordState) {
+            FinalRecordState.Process -> {
                 state = state.copy(
-                    isFinalRecording = false
+                    finalRecordState = FinalRecordState.Saving
                 )
-                player.stopRecording()
+                player.releasePlayer()
 
-                val sharedIntent = Intent().apply {
-                    action = Intent.ACTION_SEND_MULTIPLE
-                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, arrayListOf(Uri.fromFile(File("/storage/emulated/0/Music/final.wav"))))
-                    type = "audio/*"
+                viewModelScope.launch {
+                    player.stopRecording()
+                    state = state.copy(
+                        finalRecordState = FinalRecordState.Complete
+                    )
+                    clearLayersUseCase()
                 }
-                startIntent.tryEmit(sharedIntent)
             }
             else -> {
                 state = state.copy(
-                    isFinalRecording = true
+                    finalRecordState = FinalRecordState.Process
                 )
                 player.startRecording()
             }
@@ -120,18 +117,18 @@ class MainViewModel(
 
     private fun reduceOnRecord() {
         when {
-            state.isRecording -> {
-                val sample = createVoiceSample()
+            state.isVoiceRecording -> {
+                val sample = createVoiceSampleUseCase()
                 val layer = state.currentLayer?.copy(sample = sample)
 
                 state = state.copy(
-                    isRecording = false,
+                    isVoiceRecording = false,
                 )
                 layer?.let { saveLayerUseCase(it) }
                 player.stopVoiceRecording(sample.id)
             }
             else -> {
-                state = state.copy(isRecording = true)
+                state = state.copy(isVoiceRecording = true)
                 player.startVoiceRecording()
             }
         }
@@ -249,6 +246,18 @@ class MainViewModel(
         state.currentLayer?.sample?.id?.let {
             player.seekTo(it, intent.position)
         }
+    }
+
+    private fun reduceShareFile(intent: MainIntent.FinalRecord.Share) {
+
+    }
+
+    private fun reduceReset() {
+        state = MainState(
+            samples = state.samples,
+            currentLayerId = createLayerUseCase().id
+        )
+        player.create(state.samples)
     }
 
     private fun setupAudioParams() {

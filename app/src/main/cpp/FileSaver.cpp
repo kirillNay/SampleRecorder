@@ -12,19 +12,19 @@ using namespace std;
 
 static const char *TAG = "SampleRecorderNative";
 
-void FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleRate, int bytesPerSample) {
+void FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleRate, int bitDepth) {
     __android_log_print(ANDROID_LOG_INFO, TAG, "Saving wav file..."
                                                "\nFile info:"
                                                "\n\tsamples: %d"
                                                "\n\tduration: %f"
                                                "\n\tchannels: %d"
                                                "\n\tsample rate: %d"
-                                               "\n\tbytes per sample: %d",
+                                               "\n\tbitDepth: %d",
                                                data.size(),
                                                data.size() / (float) sampleRate,
                                                channelCount,
                                                sampleRate,
-                                               bytesPerSample);
+                                               bitDepth);
 
     ofstream audioFile;
     remove("/storage/emulated/0/Music/final.wav");
@@ -35,16 +35,14 @@ void FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleR
     audioFile << "----";
     audioFile << "WAVE";
 
-    int bitDepth = bytesPerSample * 8;
-
     // Format chunk
     audioFile << "fmt ";
     writeToFile(audioFile, 16, 4); // Size
     writeToFile(audioFile, 1, 2); // Compression code
     writeToFile(audioFile, channelCount, 2); // Number of channels
     writeToFile(audioFile, sampleRate, 4); // Sample rate
-    writeToFile(audioFile, sampleRate * channelCount * bytesPerSample, 4 ); // Byte rate
-    writeToFile(audioFile, channelCount * bytesPerSample, 2); // Block align
+    writeToFile(audioFile, sampleRate * channelCount * bitDepth / 8, 4 ); // Byte rate
+    writeToFile(audioFile, channelCount * bitDepth / 8, 2); // Block align
     writeToFile(audioFile, bitDepth, 2); // Bit depth
 
     //Data chunk
@@ -56,7 +54,7 @@ void FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleR
     auto maxAmplitude = pow(2, bitDepth - 1) - 1;
     for(int i = 0; i < data.size(); i++ ) {
         int intSample = static_cast<int32_t> (data[i] * pow(2, bitDepth - 1) - 1);
-        writeToFile(audioFile, intSample, bytesPerSample);
+        writeToFile(audioFile, intSample, bitDepth / 8);
     }
     int postAudioPosition = audioFile.tellp();
 

@@ -17,6 +17,8 @@ interface LayersRepository {
 
     fun setLayerPlaying(id: Int, isPlaying: Boolean)
 
+    fun clear()
+
     val layersFlow: Flow<List<Layer>>
 
 }

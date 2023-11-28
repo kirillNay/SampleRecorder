@@ -41,6 +41,8 @@ public:
 
     void stopSample(int id);
 
+    void releasePlayer();
+
     void setIsLooping(int id, bool isLooping);
 
     void pauseSample(int id);
@@ -98,7 +100,8 @@ private:
     // Oboe Audio Stream
     std::shared_ptr<oboe::AudioStream> audioStream;
 
-    int32_t sampleRate;
+    int sampleRate;
+    int bitDepth;
 
     bool isRecording;
     std::vector<float_t> finalRecord;

@@ -15,6 +15,8 @@ interface Player {
 
     fun stop(sampleId: Int)
 
+    fun releasePlayer()
+
     fun setSpeed(sampleId: Int, speed: Float)
 
     fun setVolume(sampleId: Int, volume: Float)
@@ -35,5 +37,5 @@ interface Player {
 
     fun startRecording()
 
-    fun stopRecording()
+    suspend fun stopRecording()
 }
