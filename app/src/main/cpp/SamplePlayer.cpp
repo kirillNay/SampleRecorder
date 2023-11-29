@@ -13,6 +13,7 @@
 using namespace oboe;
 using namespace parselib;
 using namespace iolib;
+using namespace std;
 
 static const char *TAG = "SampleRecorderNative";
 static const int CHANNEL_COUNT = 2;
@@ -257,9 +258,11 @@ void SamplePlayer::setRecording() {
     finalRecord.clear();
 }
 
-void SamplePlayer::stopRecording() {
+string SamplePlayer::stopRecording(string directory) {
     isRecording = false;
-    fileSaver->saveWav(finalRecord, CHANNEL_COUNT, sampleRate, bitDepth);
+    string fileName = fileSaver->saveWav(finalRecord, CHANNEL_COUNT, sampleRate, bitDepth, directory);
     finalRecord.clear();
+
+    return fileName;
 }
 

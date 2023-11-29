@@ -10,14 +10,17 @@
 
 class FileSaver {
 public:
-    void saveWav(
+    std::string saveWav(
             std::vector<float_t> data,
             int channelCount,
             int sampleRate,
-            int bitRate
+            int bitRate,
+            std::string fileDirectory
     );
 private:
     void writeToFile(std::ofstream &file, int value, int size);
+
+    std::string getFileName();
 };
 
 #endif //SAMPLERECORDER_FILESAVER_H

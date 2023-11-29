@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import linc.com.amplituda.Amplituda
 import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.model.Sample
+import java.io.File
 import java.io.IOException
 import java.lang.NullPointerException
 import kotlin.coroutines.resume
@@ -124,7 +125,8 @@ class PlayerImpl(
 
     override suspend fun stopRecording() {
         withContext(Dispatchers.IO) {
-            stopRecordingNative()
+            createFolder()
+            stopRecordingNative(SAVING_RECORDS_DIRECTORY)
         }
     }
 
@@ -140,6 +142,10 @@ class PlayerImpl(
         } catch (ex: IOException) {
             Log.i("PlayerImpl", "IOException$ex")
         }
+    }
+
+    private fun createFolder() {
+        File(SAVING_RECORDS_DIRECTORY).mkdir()
     }
 
     private external fun playerInitNative()
@@ -178,13 +184,15 @@ class PlayerImpl(
 
     private external fun startRecordingNative()
 
-    private external fun stopRecordingNative()
+    private external fun stopRecordingNative(directory: String)
 
     companion object {
 
         init {
             System.loadLibrary("samplerecorder")
         }
+
+        private const val SAVING_RECORDS_DIRECTORY = "/storage/emulated/0/Music/Sample Recorder/"
     }
 
 }

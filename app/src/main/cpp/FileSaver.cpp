@@ -2,7 +2,6 @@
 // Created by k.naydyuk on 26.11.2023.
 //
 
-#include <valarray>
 #include "FileSaver.h"
 #include <fstream>
 #include <iostream>
@@ -12,7 +11,7 @@ using namespace std;
 
 static const char *TAG = "SampleRecorderNative";
 
-void FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleRate, int bitDepth) {
+string FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleRate, int bitDepth, string fileDirectory) {
     __android_log_print(ANDROID_LOG_INFO, TAG, "Saving wav file..."
                                                "\nFile info:"
                                                "\n\tsamples: %d"
@@ -27,8 +26,8 @@ void FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleR
                                                bitDepth);
 
     ofstream audioFile;
-    remove("/storage/emulated/0/Music/final.wav");
-    audioFile.open("/storage/emulated/0/Music/final.wav", ios::binary);
+    string fileName = fileDirectory + getFileName() + ".wav";
+    audioFile.open(fileName, ios::binary);
 
     //Header chunk
     audioFile << "RIFF";
@@ -66,9 +65,21 @@ void FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampleR
 
     audioFile.close();
 
-    __android_log_print(ANDROID_LOG_INFO, TAG, "File Saved!");
+    string output = "File Saved to " + fileName + "!";
+    __android_log_print(ANDROID_LOG_INFO, TAG, "%s", output.c_str());
+
+    return fileName;
 }
 
 void FileSaver::writeToFile(ofstream &file, int value, int size) {
     file.write(reinterpret_cast<const char*> (&value), size);
+}
+
+string FileSaver::getFileName() {
+    time_t now = time(0);
+    const char* date_time = strtok(ctime(&now), "\n");
+    string time(date_time);
+    replace(time.begin(), time.end(), ' ', '_');
+    replace(time.begin(), time.end(), ':', '-');
+    return time;
 }

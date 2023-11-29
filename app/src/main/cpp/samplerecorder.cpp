@@ -129,6 +129,19 @@ Java_nay_kirill_samplerecorder_player_PlayerImpl_startRecordingNative(JNIEnv *en
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_nay_kirill_samplerecorder_player_PlayerImpl_stopRecordingNative(JNIEnv *env, jobject thiz) {
-    player.stopRecording();
+Java_nay_kirill_samplerecorder_player_PlayerImpl_stopRecordingNative(JNIEnv *env, jobject thiz, jstring jdirectory) {
+    const jclass stringClass = env->GetObjectClass(jdirectory);
+    const jmethodID getBytes = env->GetMethodID(stringClass, "getBytes", "(Ljava/lang/String;)[B");
+    const jbyteArray stringJbytes = (jbyteArray) env->CallObjectMethod(jdirectory, getBytes, env->NewStringUTF("UTF-8"));
+
+    size_t length = (size_t) env->GetArrayLength(stringJbytes);
+    jbyte* pBytes = env->GetByteArrayElements(stringJbytes, NULL);
+
+    std::string ret = std::string((char *)pBytes, length);
+    env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
+
+    player.stopRecording(ret);
+
+    env->DeleteLocalRef(stringJbytes);
+    env->DeleteLocalRef(stringClass);
 }

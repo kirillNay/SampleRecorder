@@ -63,7 +63,7 @@ public:
 
     void setRecording();
 
-    void stopRecording();
+    std::string stopRecording(std::string directory);
 
 
 private:
