@@ -86,6 +86,7 @@ class MainViewModel(
             is MainIntent.PlayerController.OnFinalRecord -> reduceOnFinalRecord()
             is MainIntent.FinalRecord.Share -> reduceShareFile()
             is MainIntent.FinalRecord.Reset -> reduceReset()
+            is MainIntent.FinalRecord.Open -> reduceOpenFile()
             is MainIntent.Lifecycle.OnPause -> pauseAllSamples()
             is MainIntent.Lifecycle.OnResume -> resumeAllSamples()
             is MainIntent.Lifecycle.OnDestroy -> reduceOnDestroy()
@@ -274,6 +275,14 @@ class MainViewModel(
         viewModelScope.launch {
             _eventsFlow.emit(
                 MainEvent.ShareFile(requireNotNull(state.fileDirectory) { "Field fileDirectory in state is null!" } )
+            )
+        }
+    }
+
+    private fun reduceOpenFile() {
+        viewModelScope.launch {
+            _eventsFlow.emit(
+                MainEvent.OpenFile(requireNotNull(state.fileDirectory) { "Field fileDirectory in state is null!" } )
             )
         }
     }

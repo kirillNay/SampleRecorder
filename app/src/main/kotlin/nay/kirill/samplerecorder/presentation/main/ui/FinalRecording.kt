@@ -135,6 +135,12 @@ private fun Complete(
         }
         Spacer(modifier = Modifier.height(12.dp))
         Button(
+            name = stringResource(R.string.final_record_open_button),
+        ) {
+            accept(MainIntent.FinalRecord.Open)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Button(
             name = stringResource(R.string.final_record_reset_button),
         ) {
             accept(MainIntent.FinalRecord.Reset)
