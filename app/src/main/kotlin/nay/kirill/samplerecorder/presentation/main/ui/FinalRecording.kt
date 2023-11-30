@@ -125,7 +125,7 @@ private fun Complete(
         Button(
             name = stringResource(R.string.final_record_share_button),
         ) {
-            accept(MainIntent.FinalRecord.Share(""))
+            accept(MainIntent.FinalRecord.Share)
         }
         Spacer(modifier = Modifier.height(12.dp))
         Button(

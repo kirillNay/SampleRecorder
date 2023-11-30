@@ -3,7 +3,9 @@ package nay.kirill.samplerecorder.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import nay.kirill.samplerecorder.domain.Player
@@ -30,6 +32,9 @@ class MainViewModel(
     observeLayersUseCase: ObserveLayersUseCase,
     getSamplesUseCase: GetSamplesUseCase,
 ) : ViewModel() {
+
+    private val _eventsFlow = MutableSharedFlow<MainEvent>()
+    val eventsFlow = _eventsFlow.asSharedFlow()
 
     private val layersFlow = observeLayersUseCase()
 
@@ -74,7 +79,7 @@ class MainViewModel(
             is MainIntent.Layers.RemoveLayer -> reduceRemoveLayer(intent)
             is MainIntent.Layers.SetPlaying -> reduceSetLayerPlaying(intent)
             is MainIntent.PlayerController.OnFinalRecord -> reduceOnFinalRecord()
-            is MainIntent.FinalRecord.Share -> reduceShareFile(intent)
+            is MainIntent.FinalRecord.Share -> reduceShareFile()
             is MainIntent.FinalRecord.Reset -> reduceReset()
         }
     }
@@ -99,9 +104,10 @@ class MainViewModel(
                 player.releasePlayer()
 
                 viewModelScope.launch {
-                    player.stopRecording()
+                    val directory = player.stopRecording()
                     state = state.copy(
-                        finalRecordState = FinalRecordState.Complete
+                        finalRecordState = FinalRecordState.Complete,
+                        fileDirectory = directory
                     )
                     clearLayersUseCase()
                 }
@@ -248,8 +254,12 @@ class MainViewModel(
         }
     }
 
-    private fun reduceShareFile(intent: MainIntent.FinalRecord.Share) {
-
+    private fun reduceShareFile() {
+        viewModelScope.launch {
+            _eventsFlow.emit(
+                MainEvent.ShareFile(requireNotNull(state.fileDirectory) { "Field fileDirectory in state is null!" } )
+            )
+        }
     }
 
     private fun reduceReset() {

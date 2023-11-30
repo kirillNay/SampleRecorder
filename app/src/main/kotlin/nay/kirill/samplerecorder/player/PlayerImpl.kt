@@ -1,6 +1,7 @@
 package nay.kirill.samplerecorder.player
 
 import android.content.res.AssetManager
+import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -16,6 +17,7 @@ import nay.kirill.samplerecorder.domain.model.Sample
 import java.io.File
 import java.io.IOException
 import java.lang.NullPointerException
+import java.nio.charset.Charset
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -123,11 +125,9 @@ class PlayerImpl(
         startRecordingNative()
     }
 
-    override suspend fun stopRecording() {
-        withContext(Dispatchers.IO) {
-            createFolder()
-            stopRecordingNative(SAVING_RECORDS_DIRECTORY)
-        }
+    override suspend fun stopRecording(): String = withContext(Dispatchers.IO) {
+        createFolder()
+        return@withContext String(stopRecordingNative(SAVING_RECORDS_DIRECTORY))
     }
 
     private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {
@@ -184,7 +184,7 @@ class PlayerImpl(
 
     private external fun startRecordingNative()
 
-    private external fun stopRecordingNative(directory: String)
+    private external fun stopRecordingNative(directory: String): ByteArray
 
     companion object {
 
@@ -192,7 +192,7 @@ class PlayerImpl(
             System.loadLibrary("samplerecorder")
         }
 
-        private const val SAVING_RECORDS_DIRECTORY = "/storage/emulated/0/Music/Sample Recorder/"
+        private val SAVING_RECORDS_DIRECTORY = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).path + "/Sample Recorder/"
     }
 
 }

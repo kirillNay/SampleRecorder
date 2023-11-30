@@ -51,9 +51,7 @@ sealed interface MainIntent {
 
     sealed interface FinalRecord : MainIntent {
 
-        data class Share(
-            val fileName: String
-        ) : FinalRecord
+        object Share: FinalRecord
 
         object Reset : FinalRecord
 
