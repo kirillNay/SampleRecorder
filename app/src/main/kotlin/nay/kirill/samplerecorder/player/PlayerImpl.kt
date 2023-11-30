@@ -1,16 +1,20 @@
 package nay.kirill.samplerecorder.player
 
 import android.content.res.AssetManager
+import android.os.Environment
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import linc.com.amplituda.Amplituda
 import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.model.Sample
+import java.io.File
 import java.io.IOException
 import java.lang.NullPointerException
 import kotlin.coroutines.resume
@@ -52,12 +56,20 @@ class PlayerImpl(
         stopNative(sampleId)
     }
 
-    override fun setSpeed(sampleId: Int, speed: Float) {
-        setSpeedNative(sampleId, speed)
+    override fun releasePlayer() {
+        releasePlayerNative()
     }
 
-    override fun setVolume(sampleId: Int, volume: Float) {
-        setVolumeNative(sampleId, volume)
+    override suspend fun setSpeed(sampleId: Int, speed: Float) {
+        withContext(Dispatchers.IO) {
+            setSpeedNative(sampleId, speed)
+        }
+    }
+
+    override suspend fun setVolume(sampleId: Int, volume: Float) {
+        withContext(Dispatchers.IO) {
+            setVolumeNative(sampleId, volume)
+        }
     }
 
     override fun seekTo(sampleId: Int, value: Float) {
@@ -116,8 +128,11 @@ class PlayerImpl(
         startRecordingNative()
     }
 
-    override fun stopRecording() {
-        stopRecordingNative()
+    override suspend fun stopRecording(): Result<String> = withContext(Dispatchers.IO) {
+        runCatching {
+            createFolder()
+            return@runCatching String(stopRecordingNative(SAVING_RECORDS_DIRECTORY))
+        }
     }
 
     private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {
@@ -134,6 +149,10 @@ class PlayerImpl(
         }
     }
 
+    private fun createFolder() {
+        File(SAVING_RECORDS_DIRECTORY).mkdir()
+    }
+
     private external fun playerInitNative()
 
     private external fun playNative(id: Int)
@@ -143,6 +162,8 @@ class PlayerImpl(
     private external fun pauseNative(id: Int)
 
     private external fun stopNative(id: Int)
+
+    private external fun releasePlayerNative()
 
     private external fun setLooping(id: Int, isLooping: Boolean)
 
@@ -168,13 +189,15 @@ class PlayerImpl(
 
     private external fun startRecordingNative()
 
-    private external fun stopRecordingNative()
+    private external fun stopRecordingNative(directory: String): ByteArray
 
     companion object {
 
         init {
             System.loadLibrary("samplerecorder")
         }
+
+        private val SAVING_RECORDS_DIRECTORY = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).path + "/Sample Recorder/"
     }
 
 }

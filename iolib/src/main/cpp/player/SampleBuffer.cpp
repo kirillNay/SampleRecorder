@@ -22,6 +22,7 @@
 #include "wav/WavStreamReader.h"
 //
 using namespace RESAMPLER_OUTER_NAMESPACE::resampler;
+using namespace std;
 
 namespace iolib {
 
@@ -42,7 +43,9 @@ void SampleBuffer::loadSampleData(std::vector<float_t> data, int channelCount, i
     mAudioProperties.sampleRate = sampleRate;
 
     mNumSamples = data.size();
-    mSampleData = (float*) &data[0];
+
+    mSampleData = new float[mNumSamples];
+    copy(data.begin(), data.end(), mSampleData);
 }
 
 void SampleBuffer::unloadSampleData() {

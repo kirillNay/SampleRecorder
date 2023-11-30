@@ -4,6 +4,16 @@ import nay.kirill.samplerecorder.domain.model.SampleType
 
 sealed interface MainIntent {
 
+    sealed interface Lifecycle : MainIntent {
+
+        object OnPause : Lifecycle
+
+        object OnResume : Lifecycle
+
+        object OnDestroy : Lifecycle
+
+    }
+
     sealed interface SelectSample : MainIntent {
 
         data class Expand(val type: SampleType) : SelectSample
@@ -46,6 +56,14 @@ sealed interface MainIntent {
             val volume: Float,
             val speed: Float
         ) : AudioParams
+
+    }
+
+    sealed interface FinalRecord : MainIntent {
+
+        object Share: FinalRecord
+
+        object Reset : FinalRecord
 
     }
 }

@@ -9,15 +9,13 @@
 
 #include <oboe/oboe.h>
 #include <android/log.h>
-#include <fstream>
-#include <iostream>
 
 using namespace oboe;
 using namespace parselib;
 using namespace iolib;
 using namespace std;
 
-static const char *TAG = "SamplePlayer";
+static const char *TAG = "SampleRecorderNative";
 static const int CHANNEL_COUNT = 2;
 
 namespace little_endian_io {
@@ -42,7 +40,7 @@ bool SamplePlayer::initStream() {
     builder.setDataCallback(dataCallback);
     builder.setErrorCallback(errorCallback);
     builder.setPerformanceMode(PerformanceMode::LowLatency);
-    builder.setSharingMode(SharingMode::Exclusive);
+    builder.setSharingMode(SharingMode::Shared);
     builder.setSampleRateConversionQuality(SampleRateConversionQuality::Medium);
 
     Result result = builder.openStream(audioStream);
@@ -55,6 +53,7 @@ bool SamplePlayer::initStream() {
     }
 
     sampleRate = audioStream->getSampleRate();
+    bitDepth = audioStream->getBytesPerSample() * 8;
 
     return true;
 }
@@ -141,9 +140,8 @@ DataCallbackResult SamplePlayer::DataCallback::onAudioReady(
     }
 
     if (parent->isRecording) {
-        auto data = static_cast<float *>(audioData);
-        for (int index = 0; index < numFrames; index++) {
-            parent->finalRecord.push_back(data[index]);
+        for (int index = 0; index < numFrames * CHANNEL_COUNT; index++) {
+            parent->finalRecord.push_back(((float *) audioData)[index]);
         }
     }
 
@@ -155,33 +153,62 @@ void SamplePlayer::ErrorCallback::onErrorAfterClose(AudioStream *oboeStream, Res
 }
 
 void SamplePlayer::playSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Play audio sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setPlayMode();
+        __android_log_print(ANDROID_LOG_INFO, TAG, "Number of samples: %d", samplesMap[id]->source->mSampleBuffer->getNumSamples());
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::resumeSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Resume audio sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setResumeMode();
+        __android_log_print(ANDROID_LOG_INFO, TAG, "Number of samples: %d", samplesMap[id]->source->mSampleBuffer->getNumSamples());
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::setIsLooping(int id, bool isLooping) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Set looping = %b sample with id %d", isLooping, id);
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->isLooping = isLooping;
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::pauseSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Pause sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setPauseMode();
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
 }
 
 void SamplePlayer::stopSample(int id) {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Stop sample with id %d", id);
+
     if (samplesMap[id] != nullptr) {
         samplesMap[id]->source->setStopMode();
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "Sample with id %d not found", id);
     }
+}
+
+void SamplePlayer::releasePlayer() {
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Release player!");
+
+    samplesMap.clear();
+    audioStream->requestStop();
+    audioStream->close();
 }
 
 bool SamplePlayer::isPlaying(int id) {
@@ -231,51 +258,11 @@ void SamplePlayer::setRecording() {
     finalRecord.clear();
 }
 
-void writeToFile(ofstream &file, int value, int size) {
-    file.write(reinterpret_cast<const char*> (&value), size);
-}
-
-void SamplePlayer::stopRecording() {
+string SamplePlayer::stopRecording(string directory) {
     isRecording = false;
+    string fileName = fileSaver->saveWav(finalRecord, CHANNEL_COUNT, sampleRate, bitDepth, directory);
+    finalRecord.clear();
 
-    ofstream audioFile;
-    remove("/storage/emulated/0/Music/final.wav");
-    audioFile.open("/storage/emulated/0/Music/final.wav");
-
-    //Header chunk
-    audioFile << "RIFF";
-    audioFile << "----";
-    audioFile << "WAVE";
-
-    // Format chunk
-    audioFile << "fmt ";
-    writeToFile(audioFile, 16, 4); // Size
-    writeToFile(audioFile, 1, 2); // Compression code
-    writeToFile(audioFile, CHANNEL_COUNT, 2); // Number of channels
-    writeToFile(audioFile, sampleRate, 4); // Sample rate
-    writeToFile(audioFile, sampleRate * CHANNEL_COUNT * audioStream->getBytesPerSample() / 8, 4 ); // Byte rate
-    writeToFile(audioFile, CHANNEL_COUNT * audioStream->getBytesPerSample() / 8, 2); // Block align
-    writeToFile(audioFile, CHANNEL_COUNT * audioStream->getBytesPerSample(), 2); // Bit depth
-
-    //Data chunk
-    audioFile << "data";
-    audioFile << "----";
-
-    int preAudioPosition = audioFile.tellp();
-
-    auto maxAmplitude = pow(2, 16 - 1) - 1;
-    for(int i = 0; i < finalRecord.size(); i++ ) {
-        int intSample = static_cast<int> (finalRecord[i]);
-        writeToFile(audioFile, intSample, 2);
-    }
-    int postAudioPosition = audioFile.tellp();
-
-    audioFile.seekp(preAudioPosition - 4);
-    writeToFile(audioFile, postAudioPosition - preAudioPosition, 4);
-
-    audioFile.seekp(4, ios::beg);
-    writeToFile(audioFile, postAudioPosition - 8, 4);
-
-    audioFile.close();
+    return fileName;
 }
 

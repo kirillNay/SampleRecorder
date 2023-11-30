@@ -74,7 +74,7 @@ internal class SampleRepositoryImpl : SampleRepository {
         ),
         Sample(
             name = "Naruto Flute",
-            assetName = "Naruto Flute",
+            assetName = "Naruto Flute.wav",
             type = SampleType.HORN
         ),
     )

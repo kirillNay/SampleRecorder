@@ -1,5 +1,8 @@
 package nay.kirill.samplerecorder.presentation.main.playerTimeline
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 sealed interface PlayerTimelineState {
 
     data class Data(

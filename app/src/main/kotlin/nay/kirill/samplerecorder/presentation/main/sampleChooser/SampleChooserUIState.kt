@@ -2,12 +2,16 @@ package nay.kirill.samplerecorder.presentation.main.sampleChooser
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import nay.kirill.samplerecorder.domain.model.SampleType
 
+@Immutable
 data class SampleChooserUIState(
     val sampleGroups: List<SampleGroupUi>
 )
 
+@Immutable
 data class SampleGroupUi(
     @StringRes val titleId: Int,
     @DrawableRes val iconId: Int,

@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,12 +33,15 @@ import nay.kirill.samplerecorder.presentation.main.MainIntent
 
 @Composable
 internal fun PlayerController(
-    modifier: Modifier = Modifier,
     state: PlayerControllerState,
     accept: (MainIntent.PlayerController) -> Unit
 ) {
+    val acceptInternal = remember<(MainIntent.PlayerController) -> Unit> {
+        { accept(it) }
+    }
+
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(64.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -52,7 +56,7 @@ internal fun PlayerController(
                 modifier = Modifier.fillMaxSize(),
                 name = state.layerName
             ) {
-                accept(MainIntent.PlayerController.LayersModal(open = true))
+                acceptInternal(MainIntent.PlayerController.LayersModal(open = true))
             }
         }
         if (state is PlayerControllerState.Sampling) {
@@ -61,7 +65,7 @@ internal fun PlayerController(
                     .size(48.dp)
                     .clip(RoundedCornerShape(15))
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable { accept(MainIntent.PlayerController.OnPlayButton) },
+                    .clickable { acceptInternal(MainIntent.PlayerController.OnPlayButton) },
                 contentAlignment = Alignment.Center,
             ) {
                 Image(
@@ -81,12 +85,12 @@ internal fun PlayerController(
         ) {
             RecordVoice(
                 state = state,
-                accept = accept
+                acceptInternal = acceptInternal
             )
             Spacer(Modifier.width(12.dp))
             RecordFinal(
                 state = state,
-                accept = accept
+                acceptInternal = acceptInternal
             )
         }
     }
@@ -96,7 +100,7 @@ internal fun PlayerController(
 private fun RecordVoice(
     modifier: Modifier = Modifier,
     state: PlayerControllerState,
-    accept: (MainIntent.PlayerController) -> Unit
+    acceptInternal: (MainIntent.PlayerController) -> Unit
 ) {
     val size by animateDpAsState(
         targetValue = when {
@@ -117,7 +121,7 @@ private fun RecordVoice(
                 .size(size)
                 .clip(RoundedCornerShape(15))
                 .background(MaterialTheme.colorScheme.primary)
-                .clickable { accept(MainIntent.PlayerController.OnRecord) },
+                .clickable { acceptInternal(MainIntent.PlayerController.OnRecord) },
             contentAlignment = Alignment.Center,
         ) {
             Image(
@@ -136,7 +140,7 @@ private fun RecordVoice(
 private fun RecordFinal(
     modifier: Modifier = Modifier,
     state: PlayerControllerState,
-    accept: (MainIntent.PlayerController) -> Unit
+    acceptInternal: (MainIntent.PlayerController) -> Unit
 ) {
     val size by animateDpAsState(
         targetValue = when {
@@ -157,7 +161,7 @@ private fun RecordFinal(
                 .size(size)
                 .clip(RoundedCornerShape(15))
                 .background(MaterialTheme.colorScheme.primary)
-                .clickable { accept(MainIntent.PlayerController.OnFinalRecord) },
+                .clickable { acceptInternal(MainIntent.PlayerController.OnFinalRecord) },
             contentAlignment = Alignment.Center,
         ) {
             Image(

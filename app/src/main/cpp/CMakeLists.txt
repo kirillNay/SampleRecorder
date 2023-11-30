@@ -45,6 +45,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 
         SamplePlayer.cpp
         MicRecorder.cpp
+        FileSaver.cpp
         samplerecorder.cpp)
 
 # Specifies libraries CMake should link to your target library. You

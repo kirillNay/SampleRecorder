@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,19 +38,20 @@ import nay.kirill.samplerecorder.presentation.main.MainIntent
 
 @Composable
 internal fun SampleChooser(
-    modifier: Modifier = Modifier,
     state: SampleChooserUIState,
     accept: (MainIntent.SelectSample) -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
-        modifier = modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         state.sampleGroups.forEach { group ->
-            Sample(
-                groupState = group,
-                accept = accept
-            )
+            key(group.titleId) {
+                Sample(
+                    groupState = group,
+                    accept = accept
+                )
+            }
         }
     }
 }
@@ -69,16 +71,18 @@ private fun Sample(
             accept
         )
 
-        if (!groupState.isExpanded && !groupState.isShort) {
-            val title = stringResource(id = groupState.titleId)
-            val text = remember(groupState.isSelected) {
-                groupState.samples.find { it.isSelected }?.name ?: title
+        key (groupState.isExpanded, groupState.isShort){
+            if (!groupState.isExpanded && !groupState.isShort) {
+                val title = stringResource(id = groupState.titleId)
+                val text = remember(groupState.isSelected) {
+                    groupState.samples.find { it.isSelected }?.name ?: title
+                }
+                Text(
+                    text = text,
+                    style = if (groupState.isSelected) MaterialTheme.typography.labelMedium else MaterialTheme.typography.bodyMedium,
+                    color = if (groupState.isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                )
             }
-            Text(
-                text = text,
-                style = if (groupState.isSelected) MaterialTheme.typography.labelMedium else MaterialTheme.typography.bodyMedium,
-                color = if (groupState.isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-            )
         }
     }
 }
@@ -124,6 +128,10 @@ private fun SampleButton(
         }
     )
 
+    val acceptIntent = remember<(MainIntent.SelectSample) -> Unit> {
+        { accept(it) }
+    }
+
     ElevatedCard(
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(
@@ -134,8 +142,8 @@ private fun SampleButton(
             .width(width)
             .height(height)
             .combinedClickable(
-                onClick = { accept(MainIntent.SelectSample.Default(type = groupState.type)) },
-                onLongClick = { accept(MainIntent.SelectSample.Expand(type = groupState.type)) }
+                onClick = { acceptIntent(MainIntent.SelectSample.Default(type = groupState.type)) },
+                onLongClick = { acceptIntent(MainIntent.SelectSample.Expand(type = groupState.type)) }
             )
     ){
         Column(
@@ -164,7 +172,7 @@ private fun SampleButton(
                         SampleListItem(
                             sample = sample
                         ) {
-                            accept(MainIntent.SelectSample.Sample(id = sample.id))
+                            acceptIntent(MainIntent.SelectSample.Sample(id = sample.id))
                         }
                         if (index != groupState.samples.lastIndex) {
                             Divider(

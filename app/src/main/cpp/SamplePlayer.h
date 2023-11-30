@@ -12,6 +12,7 @@
 #include "player/OneShotSampleSource.h"
 #include "MicRecorder.h"
 #include "RecordedSample.h"
+#include "FileSaver.h"
 
 struct Sample {
 
@@ -40,6 +41,8 @@ public:
 
     void stopSample(int id);
 
+    void releasePlayer();
+
     void setIsLooping(int id, bool isLooping);
 
     void pauseSample(int id);
@@ -60,7 +63,7 @@ public:
 
     void setRecording();
 
-    void stopRecording();
+    std::string stopRecording(std::string directory);
 
 
 private:
@@ -97,10 +100,13 @@ private:
     // Oboe Audio Stream
     std::shared_ptr<oboe::AudioStream> audioStream;
 
-    int32_t sampleRate;
+    int sampleRate;
+    int bitDepth;
 
     bool isRecording;
     std::vector<float_t> finalRecord;
+
+    FileSaver *fileSaver = new FileSaver();
 
 };
 

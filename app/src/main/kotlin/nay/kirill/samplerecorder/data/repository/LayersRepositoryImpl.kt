@@ -48,4 +48,8 @@ internal class LayersRepositoryImpl : LayersRepository {
         }
     }
 
+    override fun clear() {
+        _layersFlow.value = mutableListOf()
+    }
+
 }

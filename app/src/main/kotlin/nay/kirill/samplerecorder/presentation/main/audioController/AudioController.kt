@@ -2,6 +2,7 @@
 
 package nay.kirill.samplerecorder.presentation.main.audioController
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -50,13 +51,15 @@ fun AudioController(
     state: AudioControllerState,
     accept: (MainIntent) -> Unit
 ) {
-    fun Modifier.vertical() = layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        layout(placeable.height, placeable.width) {
-            placeable.place(
-                x = -(placeable.width / 2 - placeable.height / 2),
-                y = -(placeable.height / 2 - placeable.width / 2)
-            )
+    val verticalModifier = remember {
+        Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints)
+            layout(placeable.height, placeable.width) {
+                placeable.place(
+                    x = -(placeable.width / 2 - placeable.height / 2),
+                    y = -(placeable.height / 2 - placeable.width / 2)
+                )
+            }
         }
     }
 
@@ -69,8 +72,7 @@ fun AudioController(
             text = stringResource(id = R.string.volume),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .vertical()
+            modifier = verticalModifier
                 .rotate(-90F)
                 .padding(bottom = 6.dp),
         )
@@ -94,7 +96,7 @@ fun AudioController(
                 val initialX = constraints.maxWidth * state.speed - circleDiameterPx / 2
                 val initialY = constraints.maxHeight * state.volume - circleDiameterPx / 2
 
-                var offset by remember(state.layerId) {
+                var offset by remember {
                     mutableStateOf(Offset(initialX, initialY))
                 }
 
