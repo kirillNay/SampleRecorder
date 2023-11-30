@@ -85,7 +85,7 @@ class MainStateConverter(
     private fun MainState.layersBottomSheetState() = LayersBottomSheetState(
         opened = isLayersOpen,
         layers = layers.toUI(selectedId = currentLayerId),
-        editAvailable = !isVoiceRecording
+        editAvailable = !isVoiceRecording && finalRecordState != FinalRecordState.Process
     )
 
     private fun List<Layer>.toUI(selectedId: Int): List<LayerUi> = map { layer ->

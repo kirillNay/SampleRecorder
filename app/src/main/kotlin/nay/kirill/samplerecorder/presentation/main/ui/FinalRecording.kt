@@ -28,6 +28,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.presentation.main.FinalRecordUIState
 import nay.kirill.samplerecorder.presentation.main.MainIntent
+import nay.kirill.samplerecorder.presentation.main.layers.LayersBottomSheet
 import nay.kirill.samplerecorder.presentation.main.playerController.PlayerController
 
 @Composable
@@ -49,6 +50,11 @@ private fun Process(
     accept: (MainIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    LayersBottomSheet(
+        state = state.layersBottomSheetState,
+        accept = accept
+    )
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -146,7 +152,7 @@ private fun Button(
         modifier = modifier
             .clip(RoundedCornerShape(15))
             .height(48.dp)
-            .width(160.dp)
+            .width(200.dp)
             .background(MaterialTheme.colorScheme.primary)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
