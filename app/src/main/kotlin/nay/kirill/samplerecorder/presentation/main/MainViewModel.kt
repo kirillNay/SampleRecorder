@@ -169,7 +169,9 @@ class MainViewModel(
         state = MainState(
             samples = state.samples,
             currentLayerId = layer.id,
-            layers = state.layers
+            layers = state.layers,
+            initialSpeedScale = (MAX_SPEED_VALUE - layer.speed) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
+            initialVolumeScale = (MAX_VOLUME_VALUE - layer.volume) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE)
         )
         layer.sample?.let { onSampleSelected(it, layer.isPlaying) }
     }
@@ -242,6 +244,8 @@ class MainViewModel(
         setPlayingLayerUseCase(state.currentLayerId, !state.isPlaying)
     }
 
+    // intent.speed = (speed - MAX) / (MIN - MAX)
+
     private fun reduceNewAudioParams(intent: MainIntent.AudioParams.NewParams) {
         val speed = MAX_SPEED_VALUE - (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
         val volume = MAX_VOLUME_VALUE - (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume
@@ -289,7 +293,6 @@ class MainViewModel(
             setAudioParamsJob?.cancel()
             setAudioParamsJob = viewModelScope.launch {
                 delay(100)
-                if (!isActive) return@launch
                 player.setSpeed(sampleId, layer.speed)
                 player.setVolume(sampleId, layer.volume)
             }

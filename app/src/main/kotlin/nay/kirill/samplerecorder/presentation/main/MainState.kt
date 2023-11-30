@@ -13,6 +13,10 @@ const val MIN_VOLUME_VALUE = 0F
 const val INITIAL_SPEED_VALUE = 1F
 const val INITIAL_VOLUME_VALUE = 1F
 
+internal fun calculateSpeedScale(speed: Float) = (speed - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE)
+
+internal fun calculateVolumeScale(volume: Float) = (volume - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE)
+
 data class MainState(
     val samples: List<Sample>,
     val currentLayerId: Int,
@@ -20,8 +24,8 @@ data class MainState(
     val expandedType: SampleType? = null,
     val amplitude: List<Float>? = null,
     val progress: Float = 0F,
-    val initialSpeedScale: Float = (INITIAL_SPEED_VALUE - MIN_SPEED_VALUE) / (MAX_SPEED_VALUE - MIN_SPEED_VALUE),
-    val initialVolumeScale: Float = (INITIAL_VOLUME_VALUE - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE),
+    val initialSpeedScale: Float = calculateSpeedScale(INITIAL_SPEED_VALUE),
+    val initialVolumeScale: Float = calculateVolumeScale(INITIAL_VOLUME_VALUE),
     val duration: Int = 0,
     val isLayersOpen: Boolean = false,
     val isVoiceRecording: Boolean = false,

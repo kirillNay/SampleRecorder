@@ -171,10 +171,11 @@ private fun SelectedSample(
         } else {
             Spacer(modifier = Modifier.height(170.dp))
             AudioController(
-                modifier = Modifier.weight(1F),
+                modifier = Modifier.height(400.dp),
                 state = state.audioControllerState,
                 accept = accept
             )
+            Spacer(Modifier.weight(1F))
         }
         Spacer(modifier = Modifier.height(18.dp))
         PlayerTimeline(

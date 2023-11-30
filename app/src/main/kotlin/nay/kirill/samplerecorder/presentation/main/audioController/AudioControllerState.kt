@@ -1,8 +1,8 @@
 package nay.kirill.samplerecorder.presentation.main.audioController
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 
-@Immutable
+@Stable
 data class AudioControllerState(
     val layerId: Int,
     val volume: Float,

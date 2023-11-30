@@ -96,15 +96,13 @@ fun AudioController(
                 val initialX = constraints.maxWidth * state.speed - circleDiameterPx / 2
                 val initialY = constraints.maxHeight * state.volume - circleDiameterPx / 2
 
-                var offset by remember(state.layerId) {
+                var offset by remember {
                     mutableStateOf(Offset(initialX, initialY))
                 }
 
                 val textMeasure = rememberTextMeasurer()
                 val textStyle = MaterialTheme.typography.bodySmall
                 val color = MaterialTheme.colorScheme.outlineVariant
-
-                Log.i("Recomposition", "107")
 
                 Box(
                     modifier = Modifier
