@@ -246,8 +246,6 @@ class MainViewModel(
         setPlayingLayerUseCase(state.currentLayerId, !state.isPlaying)
     }
 
-    // intent.speed = (speed - MAX) / (MIN - MAX)
-
     private fun reduceNewAudioParams(intent: MainIntent.AudioParams.NewParams) {
         val speed = MAX_SPEED_VALUE - (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
         val volume = MAX_VOLUME_VALUE - (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume
