@@ -52,9 +52,11 @@ internal fun LayersBottomSheet(
         skipPartiallyExpanded = true
     )
 
+    val acceptInternal = remember<(MainIntent) -> Unit> { { accept(it) } }
+
     if (state.opened) {
         ModalBottomSheet(
-            onDismissRequest = { accept(MainIntent.PlayerController.LayersModal(false)) },
+            onDismissRequest = { acceptInternal(MainIntent.PlayerController.LayersModal(false)) },
             sheetState = modalBottomSheetState,
             dragHandle = { BottomSheetDefaults.DragHandle() },
         ) {
@@ -74,15 +76,15 @@ internal fun LayersBottomSheet(
                         Layer(
                             modifier = Modifier.animateItemPlacement(),
                             layer = layer,
-                            removeAvailable = state.editAvailable,
-                            accept = accept
+                            editAvailable = state.editAvailable,
+                            accept = acceptInternal
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 if (state.editAvailable) {
                     CreateNew {
-                        accept(MainIntent.Layers.CreateNew)
+                        acceptInternal(MainIntent.Layers.CreateNew)
                     }
                 }
 
@@ -95,7 +97,7 @@ internal fun LayersBottomSheet(
 @Composable
 private fun Layer(
     layer: LayerUi,
-    removeAvailable: Boolean,
+    editAvailable: Boolean,
     modifier: Modifier = Modifier,
     accept: (MainIntent.Layers) -> Unit
 ) {
@@ -115,7 +117,9 @@ private fun Layer(
             .borderInCase(layer.isSelected)
             .clickable(
                 onClick = {
-                    accept(MainIntent.Layers.SelectLayer(layer.id))
+                    if (editAvailable) {
+                        accept(MainIntent.Layers.SelectLayer(layer.id))
+                    }
                 },
                 enabled = !layer.isSelected
             ),
@@ -126,7 +130,7 @@ private fun Layer(
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSecondaryContainer
         )
-        if (!layer.isSelected && removeAvailable) {
+        if (!layer.isSelected && editAvailable) {
             Image(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)

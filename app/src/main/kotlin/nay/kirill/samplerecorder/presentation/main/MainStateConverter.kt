@@ -30,7 +30,7 @@ class MainStateConverter(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = true,
                     isFinalRecording = false,
-                    isRecordAvailable = isRecordPermissionGranted
+                    isRecordAvailable = isRecordPermissionGranted && state.selectedSample == null
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
@@ -40,7 +40,7 @@ class MainStateConverter(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = false,
                     isFinalRecording = false,
-                    isRecordAvailable = isRecordPermissionGranted
+                    isRecordAvailable = isRecordPermissionGranted && state.selectedSample == null
                 ),
                 layersBottomSheetState = state.layersBottomSheetState()
             )
@@ -53,7 +53,7 @@ class MainStateConverter(
                     layerName = resourceManager.getString(R.string.layer_name, state.currentLayerId),
                     isRecording = false,
                     isFinalRecording = false,
-                    isRecordAvailable = isRecordPermissionGranted
+                    isRecordAvailable = isRecordPermissionGranted && state.selectedSample == null
                 ),
                 timeline = state.amplitude?.let {
                     PlayerTimelineState.Data(
@@ -156,7 +156,7 @@ class MainStateConverter(
                 layerName = resourceManager.getString(R.string.layer_name, currentLayerId),
                 isRecording = false,
                 isFinalRecording = true,
-                isRecordAvailable = isRecordPermissionGranted
+                isRecordAvailable = false
             ),
             layersBottomSheetState = layersBottomSheetState()
         )
