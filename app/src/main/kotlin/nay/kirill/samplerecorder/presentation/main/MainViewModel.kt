@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nay.kirill.samplerecorder.domain.Player
@@ -87,6 +86,9 @@ class MainViewModel(
             is MainIntent.PlayerController.OnFinalRecord -> reduceOnFinalRecord()
             is MainIntent.FinalRecord.Share -> reduceShareFile()
             is MainIntent.FinalRecord.Reset -> reduceReset()
+            is MainIntent.Lifecycle.OnPause -> pauseAllSamples()
+            is MainIntent.Lifecycle.OnResume -> resumeAllSamples()
+            is MainIntent.Lifecycle.OnDestroy -> reduceOnDestroy()
         }
     }
 
@@ -161,8 +163,8 @@ class MainViewModel(
     }
 
     private fun reduceRemoveLayer(intent: MainIntent.Layers.RemoveLayer) {
-        removeLayerUseCase(intent.id)
         state.layers.find { it.id == intent.id }?.sample?.let { player.stop(it.id) }
+        removeLayerUseCase(intent.id)
     }
 
     private fun resetStateWithLayer(layer: Layer) {
@@ -314,6 +316,22 @@ class MainViewModel(
         viewModelScope.launch {
             _eventsFlow.emit(MainEvent.FailureToast(exception.message))
         }
+    }
+
+    private fun pauseAllSamples() {
+        state.layers.filter { it.isPlaying }.forEach {
+            it.sample?.id?.let(player::pause)
+        }
+    }
+
+    private fun resumeAllSamples() {
+        state.layers.filter { it.isPlaying }.forEach {
+            it.sample?.id?.let(player::resume)
+        }
+    }
+
+    private fun reduceOnDestroy() {
+        player.releasePlayer()
     }
 
 }

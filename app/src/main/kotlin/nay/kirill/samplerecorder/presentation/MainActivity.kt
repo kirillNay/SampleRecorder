@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import nay.kirill.samplerecorder.presentation.main.MainEvent
+import nay.kirill.samplerecorder.presentation.main.MainIntent
 import nay.kirill.samplerecorder.presentation.main.MainScreen
 import nay.kirill.samplerecorder.presentation.main.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -18,6 +19,11 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel()
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.accept(MainIntent.Lifecycle.OnPause)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +51,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        viewModel.accept(MainIntent.Lifecycle.OnResume)
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.RECORD_AUDIO), 0);
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isFinishing) viewModel.accept(MainIntent.Lifecycle.OnDestroy)
     }
 }
