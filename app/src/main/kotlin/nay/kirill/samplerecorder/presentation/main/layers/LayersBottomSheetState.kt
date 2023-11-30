@@ -1,8 +1,10 @@
 package nay.kirill.samplerecorder.presentation.main.layers
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nay.kirill.samplerecorder.presentation.main.LayerUi
 
+@Immutable
 data class LayersBottomSheetState(
     val opened: Boolean,
     val layers: List<LayerUi>,

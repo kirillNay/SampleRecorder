@@ -1,5 +1,6 @@
 package nay.kirill.samplerecorder.presentation.main
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.model.SampleType
@@ -25,6 +26,7 @@ sealed interface FinalRecordUIState : MainUIState {
 
 }
 
+@Immutable
 sealed interface SamplingUIState : MainUIState {
 
     val playerControllerState: PlayerControllerState

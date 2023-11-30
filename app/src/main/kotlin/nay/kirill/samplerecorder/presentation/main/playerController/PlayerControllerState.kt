@@ -1,9 +1,11 @@
 package nay.kirill.samplerecorder.presentation.main.playerController
 
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nay.kirill.samplerecorder.R
 
+@Immutable
 sealed interface PlayerControllerState {
 
     val layerName: String

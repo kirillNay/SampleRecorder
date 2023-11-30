@@ -2,12 +2,16 @@ package nay.kirill.samplerecorder.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.usecase.GetSamplesUseCase
 import nay.kirill.samplerecorder.domain.model.Layer
@@ -53,6 +57,8 @@ class MainViewModel(
     val uiState = _uiState.asStateFlow()
 
     private var playerProgressObserverJob: Job? = null
+
+    private var setAudioParamsJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -217,9 +223,11 @@ class MainViewModel(
         initPlayerObserver(sample)
 
         viewModelScope.launch {
-            player.getAmplitude(sample.id)
-                .onSuccess { state = state.copy(amplitude = it) }
-                .onFailure { state = state.copy(amplitude = null) }
+            withContext(Dispatchers.IO) {
+                player.getAmplitude(sample.id)
+                    .onSuccess { state = state.copy(amplitude = it) }
+                    .onFailure { state = state.copy(amplitude = null) }
+            }
         }
     }
 
@@ -278,8 +286,13 @@ class MainViewModel(
         state.currentLayer?.sample?.id?.let { sampleId ->
             val layer = state.currentLayer ?: return
 
-            player.setSpeed(sampleId, layer.speed)
-            player.setVolume(sampleId, layer.volume)
+            setAudioParamsJob?.cancel()
+            setAudioParamsJob = viewModelScope.launch {
+                delay(100)
+                if (!isActive) return@launch
+                player.setSpeed(sampleId, layer.speed)
+                player.setVolume(sampleId, layer.volume)
+            }
         }
     }
 

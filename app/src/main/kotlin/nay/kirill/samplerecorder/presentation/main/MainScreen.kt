@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,8 +36,15 @@ internal fun MainScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    val accept = remember<(MainIntent) -> Unit> {
+        { viewModel.accept(it) }
+    }
+
     SampleRecorderTheme {
-            Content(state = state, accept = viewModel::accept)
+            Content(
+                state = state,
+                accept = accept
+            )
     }
 }
 

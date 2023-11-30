@@ -17,9 +17,9 @@ interface Player {
 
     fun releasePlayer()
 
-    fun setSpeed(sampleId: Int, speed: Float)
+    suspend fun setSpeed(sampleId: Int, speed: Float)
 
-    fun setVolume(sampleId: Int, volume: Float)
+    suspend fun setVolume(sampleId: Int, volume: Float)
 
     fun seekTo(sampleId: Int, value: Float)
 

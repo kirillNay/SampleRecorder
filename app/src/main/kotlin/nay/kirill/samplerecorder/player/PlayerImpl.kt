@@ -17,7 +17,6 @@ import nay.kirill.samplerecorder.domain.model.Sample
 import java.io.File
 import java.io.IOException
 import java.lang.NullPointerException
-import java.nio.charset.Charset
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -61,12 +60,16 @@ class PlayerImpl(
         releasePlayerNative()
     }
 
-    override fun setSpeed(sampleId: Int, speed: Float) {
-        setSpeedNative(sampleId, speed)
+    override suspend fun setSpeed(sampleId: Int, speed: Float) {
+        withContext(Dispatchers.IO) {
+            setSpeedNative(sampleId, speed)
+        }
     }
 
-    override fun setVolume(sampleId: Int, volume: Float) {
-        setVolumeNative(sampleId, volume)
+    override suspend fun setVolume(sampleId: Int, volume: Float) {
+        withContext(Dispatchers.IO) {
+            setVolumeNative(sampleId, volume)
+        }
     }
 
     override fun seekTo(sampleId: Int, value: Float) {
