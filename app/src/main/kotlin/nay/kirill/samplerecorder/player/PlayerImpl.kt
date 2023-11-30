@@ -128,7 +128,6 @@ class PlayerImpl(
     override suspend fun stopRecording(): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             createFolder()
-            throw IOException("Exception you suck")
             return@runCatching String(stopRecordingNative(SAVING_RECORDS_DIRECTORY))
         }
     }
