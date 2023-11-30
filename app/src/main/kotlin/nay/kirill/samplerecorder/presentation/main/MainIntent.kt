@@ -65,5 +65,7 @@ sealed interface MainIntent {
 
         object Reset : FinalRecord
 
+        object Open : FinalRecord
+
     }
 }

@@ -86,6 +86,7 @@ class MainViewModel(
             is MainIntent.PlayerController.OnFinalRecord -> reduceOnFinalRecord()
             is MainIntent.FinalRecord.Share -> reduceShareFile()
             is MainIntent.FinalRecord.Reset -> reduceReset()
+            is MainIntent.FinalRecord.Open -> reduceOpenFile()
             is MainIntent.Lifecycle.OnPause -> pauseAllSamples()
             is MainIntent.Lifecycle.OnResume -> resumeAllSamples()
             is MainIntent.Lifecycle.OnDestroy -> reduceOnDestroy()
@@ -246,8 +247,6 @@ class MainViewModel(
         setPlayingLayerUseCase(state.currentLayerId, !state.isPlaying)
     }
 
-    // intent.speed = (speed - MAX) / (MIN - MAX)
-
     private fun reduceNewAudioParams(intent: MainIntent.AudioParams.NewParams) {
         val speed = MAX_SPEED_VALUE - (MAX_SPEED_VALUE - MIN_SPEED_VALUE) * intent.speed
         val volume = MAX_VOLUME_VALUE - (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE) * intent.volume
@@ -276,6 +275,14 @@ class MainViewModel(
         viewModelScope.launch {
             _eventsFlow.emit(
                 MainEvent.ShareFile(requireNotNull(state.fileDirectory) { "Field fileDirectory in state is null!" } )
+            )
+        }
+    }
+
+    private fun reduceOpenFile() {
+        viewModelScope.launch {
+            _eventsFlow.emit(
+                MainEvent.OpenFile(requireNotNull(state.fileDirectory) { "Field fileDirectory in state is null!" } )
             )
         }
     }

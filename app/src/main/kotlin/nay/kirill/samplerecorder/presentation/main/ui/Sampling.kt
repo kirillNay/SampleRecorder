@@ -171,7 +171,7 @@ private fun SelectedSample(
         } else {
             Spacer(modifier = Modifier.height(170.dp))
             AudioController(
-                modifier = Modifier.height(400.dp),
+                modifier = Modifier.height(350.dp),
                 state = state.audioControllerState,
                 accept = accept
             )

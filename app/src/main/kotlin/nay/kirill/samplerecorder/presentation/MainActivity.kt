@@ -38,6 +38,12 @@ class MainActivity : ComponentActivity() {
                             intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(event.fileDirectory))
                             startActivity(Intent.createChooser(intent, "Share recorded file!"))
                         }
+                        is MainEvent.OpenFile -> {
+                            val intent = Intent()
+                            intent.action = Intent.ACTION_VIEW
+                            intent.setDataAndType(Uri.parse(event.fileDirectory), "*/*")
+                            startActivity(intent)
+                        }
                         is MainEvent.FailureToast -> {
                             Toast.makeText(this@MainActivity, "Ошибка: " + event.message, Toast.LENGTH_SHORT).show()
                         }
