@@ -26,7 +26,8 @@ data class MainState(
     val isLayersOpen: Boolean = false,
     val isVoiceRecording: Boolean = false,
     val finalRecordState: FinalRecordState = FinalRecordState.None,
-    val fileDirectory: String? = null
+    val fileDirectory: String? = null,
+    val exception: Throwable? = null
 ) {
 
     val currentLayer: Layer? get() = layers.find { it.id == currentLayerId }

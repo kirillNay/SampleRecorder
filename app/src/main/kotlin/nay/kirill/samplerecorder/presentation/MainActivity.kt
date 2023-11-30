@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +31,9 @@ class MainActivity : ComponentActivity() {
                             intent.type = "audio/wav"
                             intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(event.fileDirectory))
                             startActivity(Intent.createChooser(intent, "Share recorded file!"))
+                        }
+                        is MainEvent.FailureToast -> {
+                            Toast.makeText(this@MainActivity, "Ошибка: " + event.message, Toast.LENGTH_SHORT).show()
                         }
                     }
                 }

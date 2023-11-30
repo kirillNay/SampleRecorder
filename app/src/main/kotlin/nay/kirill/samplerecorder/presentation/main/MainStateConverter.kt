@@ -23,6 +23,7 @@ class MainStateConverter(
 
     override fun invoke(state: MainState): MainUIState {
         return when {
+            state.exception != null -> FailureUIState
             state.finalRecordState != FinalRecordState.None -> state.finalRecordState()
             state.isVoiceRecording -> SamplingUIState.Recording(
                 playerControllerState = PlayerControllerState.EmptySample(

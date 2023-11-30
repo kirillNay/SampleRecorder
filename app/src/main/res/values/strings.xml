@@ -16,11 +16,14 @@
 
     <string name="record_on_process">Происходит запись с микрофона</string>
 
+    <string name="common_failure_message">Произошла ошибка!</string>
+    <string name="reply_button">Повторить</string>
+
     <string name="final_record_on_process">Происходит запись аудио</string>
     <string name="final_record_on_saving">Происходит сохранение аудио</string>
     <string name="final_record_saved">Запись сохранена!</string>
 
     <string name="final_record_share_button">Поделиться</string>
-    <string name="final_record_reset_button">Повторить</string>
+    <string name="final_record_reset_button">Создать еще запись</string>
 
 </resources>

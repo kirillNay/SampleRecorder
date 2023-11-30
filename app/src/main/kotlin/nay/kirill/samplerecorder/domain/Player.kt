@@ -29,7 +29,7 @@ interface Player {
 
     fun observeProgress(sampleId: Int): Flow<Float>
 
-    fun getDuration(sampleId: Int): Int
+    fun getDuration(sampleId: Int) : Int
 
     fun startVoiceRecording()
 
@@ -37,5 +37,5 @@ interface Player {
 
     fun startRecording()
 
-    suspend fun stopRecording(): String
+    suspend fun stopRecording(): Result<String>
 }

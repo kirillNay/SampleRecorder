@@ -53,6 +53,8 @@ sealed interface SamplingUIState : MainUIState {
 
 }
 
+object FailureUIState : MainUIState
+
 data class LayerUi(
     val id: Int,
     val name: String,

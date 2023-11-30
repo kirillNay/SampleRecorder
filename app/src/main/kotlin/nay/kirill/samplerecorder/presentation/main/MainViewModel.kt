@@ -104,11 +104,15 @@ class MainViewModel(
                 player.releasePlayer()
 
                 viewModelScope.launch {
-                    val directory = player.stopRecording()
-                    state = state.copy(
-                        finalRecordState = FinalRecordState.Complete,
-                        fileDirectory = directory
-                    )
+                    player.stopRecording()
+                        .onSuccess {
+                            state = state.copy(
+                                finalRecordState = FinalRecordState.Complete,
+                                fileDirectory = it
+                            )
+                        }
+                        .onFailure(::onFailure)
+
                     clearLayersUseCase()
                 }
             }
@@ -283,6 +287,17 @@ class MainViewModel(
         val sample = state.currentLayer?.sample ?: return
 
         player.stop(sample.id)
+    }
+
+    private fun onFailure(exception: Throwable) {
+        state = MainState(
+            samples = state.samples,
+            currentLayerId = 0,
+            exception = exception
+        )
+        viewModelScope.launch {
+            _eventsFlow.emit(MainEvent.FailureToast(exception.message))
+        }
     }
 
 }

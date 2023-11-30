@@ -125,9 +125,12 @@ class PlayerImpl(
         startRecordingNative()
     }
 
-    override suspend fun stopRecording(): String = withContext(Dispatchers.IO) {
-        createFolder()
-        return@withContext String(stopRecordingNative(SAVING_RECORDS_DIRECTORY))
+    override suspend fun stopRecording(): Result<String> = withContext(Dispatchers.IO) {
+        runCatching {
+            createFolder()
+            throw IOException("Exception you suck")
+            return@runCatching String(stopRecordingNative(SAVING_RECORDS_DIRECTORY))
+        }
     }
 
     private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {
