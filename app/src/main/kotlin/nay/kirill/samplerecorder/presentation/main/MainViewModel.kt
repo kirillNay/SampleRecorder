@@ -168,7 +168,7 @@ class MainViewModel(
                 if (progress == 1F) { artManager.isPlaying = false }
 
                 record.recordData.getOrNull((record.recordData.size * progress).toInt())?.let {
-                    artManager.speed = kotlin.math.abs(it) * 10
+                    artManager.speed = 1 + kotlin.math.abs(it) * 50
                 }
 
                 state = state.copy(
