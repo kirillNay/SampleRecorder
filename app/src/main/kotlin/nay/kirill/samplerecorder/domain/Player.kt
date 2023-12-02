@@ -37,5 +37,22 @@ interface Player {
 
     fun startRecording()
 
-    suspend fun stopRecording(): Result<String>
+    suspend fun stopRecording(): Result<FinalRecord>
+
+    fun createFinalRecordPlayer()
+
+    fun playFinalRecord()
+
+    fun setFinalRecordProgress(progress: Float)
+
+    fun pauseFinalRecord()
+
+    fun observeFinalProgress(): Flow<Float>
+
+    data class FinalRecord(
+        val fileName: String,
+        val fileDir: String,
+        val duration: Float,
+        val recordData: List<Float>
+    )
 }

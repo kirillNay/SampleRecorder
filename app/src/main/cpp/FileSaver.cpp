@@ -26,7 +26,8 @@ string FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampl
                                                bitDepth);
 
     ofstream audioFile;
-    string fileName = fileDirectory + getFileName() + ".wav";
+    string fileOriginalName = getFileName();
+    string fileName = fileDirectory + fileOriginalName + ".wav";
     audioFile.open(fileName, ios::binary);
 
     //Header chunk
@@ -68,7 +69,7 @@ string FileSaver::saveWav(std::vector<float_t> data, int channelCount, int sampl
     string output = "File Saved to " + fileName + "!";
     __android_log_print(ANDROID_LOG_INFO, TAG, "%s", output.c_str());
 
-    return fileName;
+    return fileOriginalName;
 }
 
 void FileSaver::writeToFile(ofstream &file, int value, int size) {

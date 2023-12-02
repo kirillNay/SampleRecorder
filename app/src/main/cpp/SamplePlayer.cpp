@@ -261,8 +261,32 @@ void SamplePlayer::setRecording() {
 string SamplePlayer::stopRecording(string directory) {
     isRecording = false;
     string fileName = fileSaver->saveWav(finalRecord, CHANNEL_COUNT, sampleRate, bitDepth, directory);
-    finalRecord.clear();
 
     return fileName;
 }
 
+void SamplePlayer::clearFinalRecording() {
+    finalRecord.clear();
+}
+
+float SamplePlayer::getFinalrecordDuration() {
+    return finalRecord.size() / CHANNEL_COUNT / sampleRate;
+}
+
+void SamplePlayer::createFinalRecordSample(int id) {
+    SampleBuffer *sampleBuffer = new SampleBuffer();
+    sampleBuffer->loadSampleData(finalRecord, CHANNEL_COUNT, sampleRate);
+
+    OneShotSampleSource *source = new OneShotSampleSource(sampleBuffer, 1);
+    source->setGain(1);
+
+    sampleBuffer->resampleData(sampleRate);
+    samplesMap[id] = new Sample(sampleBuffer, source, id);
+    samplesMap[id]->source->isLooping = false;
+
+    __android_log_print(ANDROID_LOG_INFO, TAG, "Final record sample create with id %d", id);
+}
+
+std::vector<float_t> SamplePlayer::getFinalRecord() {
+    return finalRecord;
+}

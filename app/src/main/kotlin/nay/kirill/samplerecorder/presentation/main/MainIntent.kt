@@ -67,5 +67,21 @@ sealed interface MainIntent {
 
         object Open : FinalRecord
 
+        object Visualising : FinalRecord
+
+    }
+
+    sealed interface Visualising : MainIntent {
+
+        object Play : Visualising
+
+        object Back : Visualising
+
+        object ToStart : Visualising
+
+        object ToEnd : Visualising
+
+        data class NameEdit(val name: String) : Visualising
+
     }
 }

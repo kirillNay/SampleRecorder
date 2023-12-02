@@ -4,6 +4,7 @@
 #include <jni.h>
 #include <string>
 #include <oboe/Oboe.h>
+#include <future>
 #include "SamplePlayer.h"
 #include "MicRecorder.h"
 
@@ -149,4 +150,36 @@ Java_nay_kirill_samplerecorder_player_PlayerImpl_stopRecordingNative(JNIEnv *env
     env->SetByteArrayRegion(array, 0, result.length(), (jbyte*)result.c_str());
 
     return array;
+}
+
+extern "C"
+JNIEXPORT jfloat JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_getFinalRecordDuration(JNIEnv *env, jobject thiz) {
+    return player.getFinalrecordDuration();
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_clearFinalRecord(JNIEnv *env, jobject thiz) {
+    player.clearFinalRecording();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_playFinalRecordNative(JNIEnv *env, jobject thiz, jint id) {
+    player.createFinalRecordSample(id);
+}
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_nay_kirill_samplerecorder_player_PlayerImpl_getFinalRecordData(JNIEnv *env, jobject thiz) {
+    std::vector<float_t> record = player.getFinalRecord();
+
+    float* temp = new float[record.size()];
+    std::copy(record.begin(), record.end(), temp);
+
+    jfloatArray result = env->NewFloatArray(record.size());
+
+    env->SetFloatArrayRegion(result, 0, record.size(), temp);
+
+    return result;
 }
