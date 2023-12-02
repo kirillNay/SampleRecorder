@@ -26,5 +26,6 @@
     <string name="final_record_share_button">Поделиться</string>
     <string name="final_record_open_button">Открыть</string>
     <string name="final_record_reset_button">Создать еще запись</string>
+    <string name="final_record_visualising_button">Визуализация</string>
 
 </resources>

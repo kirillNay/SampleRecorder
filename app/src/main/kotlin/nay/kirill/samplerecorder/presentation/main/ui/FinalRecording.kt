@@ -129,6 +129,12 @@ private fun Complete(
         )
         Spacer(modifier = Modifier.height(96.dp))
         Button(
+            name = stringResource(R.string.final_record_visualising_button),
+        ) {
+            accept(MainIntent.FinalRecord.Visualising)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Button(
             name = stringResource(R.string.final_record_share_button),
         ) {
             accept(MainIntent.FinalRecord.Share)
@@ -140,11 +146,13 @@ private fun Complete(
             accept(MainIntent.FinalRecord.Open)
         }
         Spacer(modifier = Modifier.height(12.dp))
-        Button(
-            name = stringResource(R.string.final_record_reset_button),
-        ) {
-            accept(MainIntent.FinalRecord.Reset)
-        }
+
+        // TODO fix later, now ot working properly
+//        Button(
+//            name = stringResource(R.string.final_record_reset_button),
+//        ) {
+//            accept(MainIntent.FinalRecord.Reset)
+//        }
     }
 }
 

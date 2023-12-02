@@ -1,5 +1,6 @@
 package nay.kirill.samplerecorder.presentation.main
 
+import nay.kirill.samplerecorder.domain.Player
 import nay.kirill.samplerecorder.domain.model.Layer
 import nay.kirill.samplerecorder.domain.model.Sample
 import nay.kirill.samplerecorder.domain.model.SampleType
@@ -17,6 +18,14 @@ internal fun calculateSpeedScale(speed: Float) = (speed - MIN_SPEED_VALUE) / (MA
 
 internal fun calculateVolumeScale(volume: Float) = (volume - MIN_VOLUME_VALUE) / (MAX_VOLUME_VALUE - MIN_VOLUME_VALUE)
 
+data class VisualisingState(
+    val audioDuration: Int,
+    val progress: Float,
+    val isPlaying: Boolean,
+    val name: String,
+    val arts: List<ArtOffsetState>
+)
+
 data class MainState(
     val samples: List<Sample>,
     val currentLayerId: Int,
@@ -30,8 +39,8 @@ data class MainState(
     val isLayersOpen: Boolean = false,
     val isVoiceRecording: Boolean = false,
     val finalRecordState: FinalRecordState = FinalRecordState.None,
-    val fileDirectory: String? = null,
-    val exception: Throwable? = null
+    val exception: Throwable? = null,
+    val visualisingState: VisualisingState? = null
 ) {
 
     val currentLayer: Layer? get() = layers.find { it.id == currentLayerId }
@@ -42,8 +51,14 @@ data class MainState(
 
 }
 
-enum class FinalRecordState {
+sealed interface FinalRecordState {
 
-    None, Process, Saving, Complete
+    object None : FinalRecordState
+
+    object Process : FinalRecordState
+
+    object Saving : FinalRecordState
+
+    data class Complete(val data: Player.FinalRecord) : FinalRecordState
 
 }

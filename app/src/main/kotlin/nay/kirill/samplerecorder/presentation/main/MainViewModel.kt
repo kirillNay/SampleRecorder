@@ -32,6 +32,7 @@ class MainViewModel(
     private val setPlayingLayerUseCase: SetPlayingLayerUseCase,
     private val createVoiceSampleUseCase: CreateVoiceSampleUseCase,
     private val clearLayersUseCase: ClearLayersUseCase,
+    private val artManager: ArtAnimationManager,
     observeLayersUseCase: ObserveLayersUseCase,
     getSamplesUseCase: GetSamplesUseCase,
 ) : ViewModel() {
@@ -58,6 +59,10 @@ class MainViewModel(
     private var playerProgressObserverJob: Job? = null
 
     private var setAudioParamsJob: Job? = null
+
+    private var finalRecordProgressJob: Job? = null
+
+    private var artsStateObserveJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -90,7 +95,100 @@ class MainViewModel(
             is MainIntent.Lifecycle.OnPause -> pauseAllSamples()
             is MainIntent.Lifecycle.OnResume -> resumeAllSamples()
             is MainIntent.Lifecycle.OnDestroy -> reduceOnDestroy()
+            is MainIntent.FinalRecord.Visualising -> reduceOpenVisualising()
+            is MainIntent.Visualising.Back -> reduceBackFromVisualising()
+            is MainIntent.Visualising.NameEdit -> reduceNameEdit(intent)
+            is MainIntent.Visualising.Play -> reduceFinalRecordPlay()
+            is MainIntent.Visualising.ToEnd -> reduceFinalRecordToEnd()
+            is MainIntent.Visualising.ToStart -> reduceFinalRecordToStart()
         }
+    }
+
+    private fun reduceFinalRecordToEnd() {
+        player.setFinalRecordProgress(1F)
+    }
+
+    private fun reduceFinalRecordToStart() {
+        player.setFinalRecordProgress(0F)
+    }
+
+    private fun reduceFinalRecordPlay() {
+        val vState = requireNotNull(state.visualisingState)
+
+        artManager.isPlaying = !vState.isPlaying
+        state = if (vState.isPlaying) {
+            player.pauseFinalRecord()
+
+            state.copy(visualisingState = vState.copy(isPlaying = false))
+        } else {
+            player.playFinalRecord()
+            state.copy(visualisingState = vState.copy(isPlaying = true))
+        }
+
+    }
+
+    private fun reduceNameEdit(intent: MainIntent.Visualising.NameEdit) {
+        val vState = requireNotNull(state.visualisingState)
+
+        state = state.copy(
+            visualisingState = vState.copy(name = intent.name)
+        )
+    }
+
+    private fun reduceBackFromVisualising() {
+        artsStateObserveJob?.cancel()
+        player.pauseFinalRecord()
+        state = state.copy(visualisingState = null)
+    }
+
+    private fun reduceOpenVisualising() {
+        val record = (state.finalRecordState as FinalRecordState.Complete).data
+
+        player.createFinalRecordPlayer()
+
+        artsStateObserveJob?.cancel()
+        artsStateObserveJob = viewModelScope.launch {
+            artManager.observeArtsState().collect {
+                val vState = state.visualisingState ?: return@collect
+
+                state = state.copy(
+                    visualisingState = vState.copy(
+                        arts = it
+                    )
+                )
+            }
+        }
+
+        finalRecordProgressJob?.cancel()
+        finalRecordProgressJob = viewModelScope.launch {
+            var counter: Int = 0
+            player.observeFinalProgress().collect { progress ->
+                val vState = state.visualisingState ?: return@collect
+
+                if (progress == 1F) { artManager.isPlaying = false }
+
+                record.recordData.getOrNull((record.recordData.size * progress).toInt())?.let {
+                    artManager.speed = 1 + kotlin.math.abs(it) * 50
+                }
+
+                state = state.copy(
+                    visualisingState = vState.copy(
+                        progress = progress,
+                        isPlaying = if (progress == 1F) false else vState.isPlaying
+                    )
+                )
+            }
+        }
+
+        state = state.copy(
+            visualisingState = VisualisingState(
+                audioDuration = record.duration.toInt(),
+                name = record.fileName,
+                progress = 0F,
+                isPlaying = false,
+                arts = artManager.artsScaleState
+            )
+        )
     }
 
     private fun reduceSetLayerPlaying(intent: MainIntent.Layers.SetPlaying) {
@@ -110,14 +208,13 @@ class MainViewModel(
                 state = state.copy(
                     finalRecordState = FinalRecordState.Saving
                 )
-                player.releasePlayer()
+                pauseAllSamples()
 
                 viewModelScope.launch {
                     player.stopRecording()
                         .onSuccess {
                             state = state.copy(
-                                finalRecordState = FinalRecordState.Complete,
-                                fileDirectory = it
+                                finalRecordState = FinalRecordState.Complete(it),
                             )
                         }
                         .onFailure(::onFailure)
@@ -125,6 +222,7 @@ class MainViewModel(
                     clearLayersUseCase()
                 }
             }
+
             else -> {
                 state = state.copy(
                     finalRecordState = FinalRecordState.Process
@@ -146,6 +244,7 @@ class MainViewModel(
                 layer?.let { saveLayerUseCase(it) }
                 player.stopVoiceRecording(sample.id)
             }
+
             else -> {
                 state = state.copy(isVoiceRecording = true)
                 player.startVoiceRecording()
@@ -259,9 +358,9 @@ class MainViewModel(
     private fun initPlayerObserver(sample: Sample) {
         playerProgressObserverJob?.cancel()
         playerProgressObserverJob = viewModelScope.launch {
-             player.observeProgress(sample.id).collect { progress ->
-                 state = state.copy(progress = progress)
-             }
+            player.observeProgress(sample.id).collect { progress ->
+                state = state.copy(progress = progress)
+            }
         }
     }
 
@@ -273,21 +372,24 @@ class MainViewModel(
 
     private fun reduceShareFile() {
         viewModelScope.launch {
+            val fileDirectory = (state.finalRecordState as FinalRecordState.Complete).data.fileDir
             _eventsFlow.emit(
-                MainEvent.ShareFile(requireNotNull(state.fileDirectory) { "Field fileDirectory in state is null!" } )
+                MainEvent.ShareFile(requireNotNull(fileDirectory) { "Field fileDirectory in state is null!" })
             )
         }
     }
 
     private fun reduceOpenFile() {
         viewModelScope.launch {
+            val fileDirectory = (state.finalRecordState as FinalRecordState.Complete).data.fileDir
             _eventsFlow.emit(
-                MainEvent.OpenFile(requireNotNull(state.fileDirectory) { "Field fileDirectory in state is null!" } )
+                MainEvent.OpenFile(requireNotNull(fileDirectory) { "Field fileDirectory in state is null!" })
             )
         }
     }
 
     private fun reduceReset() {
+        player.releasePlayer()
         state = MainState(
             samples = state.samples,
             currentLayerId = createLayerUseCase().id

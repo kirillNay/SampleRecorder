@@ -24,6 +24,7 @@ class MainStateConverter(
     override fun invoke(state: MainState): MainUIState {
         return when {
             state.exception != null -> FailureUIState
+            state.visualisingState != null -> state.visualisingState(state.visualisingState)
             state.finalRecordState != FinalRecordState.None -> state.finalRecordState()
             state.isVoiceRecording -> SamplingUIState.Recording(
                 playerControllerState = PlayerControllerState.EmptySample(
@@ -97,7 +98,7 @@ class MainStateConverter(
         )
     }
 
-    private fun Int.toDuration(): String = "${this / 1_000 / 60}".padStart(2, '0') + ":" + "${this / 1_000 % 60}".padStart(2, '0')
+    private fun Int.toDuration(): String = "${this / 60}".padStart(2, '0') + ":" + "${this % 60}".padStart(2, '0')
 
     private fun MainState.chooserState() = SampleChooserUIState(
         sampleGroups = samples.convertToGroups(currentLayer?.sample?.id, expandedType)
@@ -160,8 +161,19 @@ class MainStateConverter(
             ),
             layersBottomSheetState = layersBottomSheetState()
         )
-        FinalRecordState.Complete -> FinalRecordUIState.Complete
+        is FinalRecordState.Complete -> FinalRecordUIState.Complete
         else -> FinalRecordUIState.Saving
+    }
+
+    private fun MainState.visualisingState(vState: VisualisingState): MainUIState {
+        return VisializingUIState.Content(
+            audioDuration = vState.audioDuration.toDuration(),
+            progress = vState.progress,
+            currentPosition = (vState.audioDuration * vState.progress).toInt().toDuration(),
+            isPlaying = vState.isPlaying,
+            name = vState.name,
+            arts = vState.arts
+        )
     }
 
 }

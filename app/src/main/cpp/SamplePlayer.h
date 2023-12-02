@@ -65,6 +65,13 @@ public:
 
     std::string stopRecording(std::string directory);
 
+    void clearFinalRecording();
+
+    float getFinalrecordDuration();
+
+    void createFinalRecordSample(int id);
+
+    std::vector<float_t> getFinalRecord();
 
 private:
     std::map<int, Sample*> samplesMap;

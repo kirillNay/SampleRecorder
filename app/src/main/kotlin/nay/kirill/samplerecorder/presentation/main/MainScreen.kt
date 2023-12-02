@@ -29,6 +29,7 @@ import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.presentation.main.theme.SampleRecorderTheme
 import nay.kirill.samplerecorder.presentation.main.ui.FinalRecording
 import nay.kirill.samplerecorder.presentation.main.ui.Sampling
+import nay.kirill.samplerecorder.presentation.main.ui.Visualising
 
 @Composable
 internal fun MainScreen(
@@ -74,6 +75,11 @@ private fun Content(
             )
             is FailureUIState -> Failure(
                 modifier = Modifier.applyContentPadding(),
+                accept = accept
+            )
+            is VisializingUIState.Content -> Visualising(
+                modifier = Modifier.applyContentPadding(),
+                state = state,
                 accept = accept
             )
         }

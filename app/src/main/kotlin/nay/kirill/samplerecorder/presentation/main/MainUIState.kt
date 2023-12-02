@@ -1,6 +1,8 @@
 package nay.kirill.samplerecorder.presentation.main
 
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nay.kirill.samplerecorder.R
 import nay.kirill.samplerecorder.domain.model.SampleType
@@ -25,6 +27,26 @@ sealed interface FinalRecordUIState : MainUIState {
     object Complete : FinalRecordUIState
 
 }
+
+sealed interface VisializingUIState : MainUIState {
+
+    @Stable
+    data class Content(
+        val audioDuration: String,
+        val progress: Float,
+        val currentPosition: String,
+        val isPlaying: Boolean,
+        val name: String,
+        val arts: List<ArtOffsetState>
+    ) : VisializingUIState
+
+}
+
+data class ArtOffsetState(
+    @DrawableRes val id: Int,
+    val offsetXScale: Float,
+    val offsetYScale: Float
+)
 
 @Immutable
 sealed interface SamplingUIState : MainUIState {

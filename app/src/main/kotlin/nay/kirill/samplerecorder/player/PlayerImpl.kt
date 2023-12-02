@@ -27,6 +27,8 @@ class PlayerImpl(
 
     private var samples: Map<Int, Sample> = mapOf()
 
+    private var finalRecordId: Int = -1
+
     override fun create(samples: List<Sample>) {
         playerInitNative()
 
@@ -128,12 +130,55 @@ class PlayerImpl(
         startRecordingNative()
     }
 
-    override suspend fun stopRecording(): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun stopRecording(): Result<Player.FinalRecord> = withContext(Dispatchers.IO) {
         runCatching {
-            createFolder()
-            return@runCatching String(stopRecordingNative(SAVING_RECORDS_DIRECTORY))
+            val dir = createFolder()
+            val fileName = String(stopRecordingNative(SAVING_RECORDS_DIRECTORY))
+            val duration = getFinalRecordDuration()
+            val recordData = getFinalRecordData()
+
+            val finalRecordedData = mutableListOf<Float>()
+            var counter = 0
+            var tempSum = 0F
+
+            recordData.forEachIndexed { _, fl ->
+                tempSum += fl
+                if (counter == 1) {
+                    finalRecordedData.add(tempSum)
+                    counter = 0
+                    tempSum = 0F
+                } else {
+                    counter++
+                }
+            }
+
+            Player.FinalRecord(
+                fileName,
+                dir + fileName,
+                duration,
+                finalRecordedData
+            )
         }
     }
+
+    override fun createFinalRecordPlayer() {
+        finalRecordId = samples.size
+        playFinalRecordNative(finalRecordId)
+    }
+
+    override fun pauseFinalRecord() {
+        pause(finalRecordId)
+    }
+
+    override fun playFinalRecord() {
+        resume(finalRecordId)
+    }
+
+    override fun setFinalRecordProgress(progress: Float) {
+        seekTo(finalRecordId, progress)
+    }
+
+    override fun observeFinalProgress(): Flow<Float> = observeProgress(finalRecordId)
 
     private fun loadWavAsset(sample: Sample, onLoad: (bytes: ByteArray) -> Unit) {
         try {
@@ -149,8 +194,9 @@ class PlayerImpl(
         }
     }
 
-    private fun createFolder() {
+    private fun createFolder(): String {
         File(SAVING_RECORDS_DIRECTORY).mkdir()
+        return SAVING_RECORDS_DIRECTORY
     }
 
     private external fun playerInitNative()
@@ -190,6 +236,14 @@ class PlayerImpl(
     private external fun startRecordingNative()
 
     private external fun stopRecordingNative(directory: String): ByteArray
+
+    private external fun getFinalRecordDuration(): Float
+
+    private external fun getFinalRecordData(): FloatArray
+
+    private external fun clearFinalRecord()
+
+    private external fun playFinalRecordNative(id: Int)
 
     companion object {
 
