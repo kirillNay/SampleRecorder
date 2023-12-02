@@ -168,6 +168,7 @@ class MainStateConverter(
     private fun MainState.visualisingState(vState: VisualisingState): MainUIState {
         return VisializingUIState.Content(
             audioDuration = vState.audioDuration.toDuration(),
+            progress = vState.progress,
             currentPosition = (vState.audioDuration * vState.progress).toInt().toDuration(),
             isPlaying = vState.isPlaying,
             name = vState.name,

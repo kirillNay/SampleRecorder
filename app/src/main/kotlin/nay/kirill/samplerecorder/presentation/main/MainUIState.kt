@@ -33,6 +33,7 @@ sealed interface VisializingUIState : MainUIState {
     @Stable
     data class Content(
         val audioDuration: String,
+        val progress: Float,
         val currentPosition: String,
         val isPlaying: Boolean,
         val name: String,

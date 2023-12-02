@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -78,6 +79,11 @@ fun Visualising(
             arts = state.arts
         )
         Spacer(modifier = Modifier.weight(1F))
+        LinearProgressIndicator(
+            modifier = Modifier.fillMaxWidth(),
+            progress = state.progress
+        )
+        Spacer(modifier = Modifier.width(12.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -186,10 +192,12 @@ fun VisualisingPreview(
     Visualising(
         state = VisializingUIState.Content(
             audioDuration = "2:02",
+            0F,
             currentPosition = "1:02",
             isPlaying = true,
             name = "",
-            listOf()
+            listOf(),
+            
         )
     ) {
 
