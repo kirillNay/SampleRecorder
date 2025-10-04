@@ -1,23 +1,20 @@
-# SampleRecorder
+## SampleRecorder - the application for Yandex Cup 2023
 
-## Приложение полуфинала для Yandex Cup 2023
+The goal of the contest was to develop a minimalist music creation application that provides wide functionality within a single screen. The app should allow users to:
+- Select instruments and choose different samples via tap and long press.
+- Control sound parameters such as volume and repetition speed using touch gestures (e.g., sliders or alternative controls).
+- Visualize sound through a dynamic area that reflects changes in the audio sequence during playback.
+- Manage layers by adding and adjusting multiple tracks, each based on different instruments or microphone input.
+- Record and playback a complete track, combining instruments, loops, and recorded audio.
 
-При всей минималистичности интерфейса приложение даёт широкие возможности: можно выбирать инструменты и управлять их звучанием, сводить вместе несколько аудиодорожек, добавлять звук с микрофона и проигрывать готовую композицию.
+## The Result
 
-##### Основные механики
+Key techniques I used in my implementation:
+- C++ processing of audio inputs
+- Low latency audio mixing using native lib
+- Jetpack Compose for UI
 
-UI приложения представлен единственным экраном, на котором находятся следующие элементы:
-###### Выбор инструмента
-С помощью этих контролов можно переключать вид инструмента, а также по лонгтапу выбирать один из нескольких вариантов. По зажатию проигрывается и выбирается семпл.
-###### Рабочая область для настройки звучания
-Двигая пальцем по экрану, мы можем настроить громкость и скорость повторения семплов для выбранного инструмента. На макете вы видите способ управления с помощью ползунков, но можно выбрать и другой.
-###### Область визуализации
-Здесь вы видите изображение звукового ряда, которое меняется, когда музыка играет. Например, оно может показывать изменения громкости.
-###### Нижняя панель инструментов
-Слева находится контрол для переключения между слоями (звуковыми рядами). Справа — кнопка для записи звука с микрофона, кнопки для записи и воспроизведения трека.
 
-Чтобы создавать музыку, нужно настроить звучание нескольких слоёв звукового ряда, который состоит из семплов определённого инструмента. Можно накладывать отдельно звук с микрофона. Например, мы можем выбрать ударный инструмент, настроить его темп и громкость. Затем добавить новый слой с гитарной партией. Затем записать поверх этого вокальную партию или даже мяуканье кота. И, когда всё готово, записываем итоговый трек, управляя через слои моментом вступления того или иного инструмента.
+https://github.com/user-attachments/assets/f9b49cae-d2d4-4bb0-a980-3e952b4f345a
 
-### Визуализация
 
-Для перехода к экрану **визуализации нужно сначала сохранить трек!**
