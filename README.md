@@ -1,5 +1,7 @@
 ## SampleRecorder - the application for Yandex Cup 2023
 
+[🏆 Link to compentition](https://yandex.ru/cup/2023)
+
 The goal of the contest was to develop a minimalist music creation application that provides wide functionality within a single screen. The app should allow users to:
 - Select instruments and choose different samples via tap and long press.
 - Control sound parameters such as volume and repetition speed using touch gestures (e.g., sliders or alternative controls).
